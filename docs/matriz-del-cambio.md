@@ -1,1 +1,6 @@
-
+| Cambio                                                                                                       | Impacto en Tiempo | Impacto en Costo | Impacto en Alcance | Impacto en Calidad | Impacto en Recursos | Prioridad |
+|--------------------------------------------------------------------------------------------------------------|-------------------|------------------|--------------------|--------------------|---------------------|-----------|
+| incorporar notificaciones inteligentes en tiempo real para recordar tiempos de adiestramiento y paseo        | Medio             | Medio            | Medio              | Medio              | Bajo                |    medio       |
+| sincronización de perfiles que permita compartir la información del perfil de perro                          | Alta              | Alta             | Alta               | Alta               | Alta                | Alta      |
+| Procesadores potentes integrando hardware especializado en IA usando Coral TPU para procesar datos en tiempo real. | Alta              | Alta             | Alto               | Alto               | Alto                | Alto      |
+| Análisis de ladridos y gruñidos mediante una librería más especializada en IA la cual sera Pytorch en lugar de librosa | Bajo              | Bajo             | Medio              | Alto               | Bajo                | Medio     |
