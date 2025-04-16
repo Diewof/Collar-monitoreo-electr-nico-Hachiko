@@ -1,0 +1,154 @@
+<?php
+/**
+ * Controlador de autenticación
+ * Maneja la lógica de negocio relacionada con el inicio de sesión y registro
+ */
+
+// Incluir el modelo
+require_once '../modelo/auth.model.php';
+
+// Iniciar sesión
+session_start();
+
+// Crear instancia del modelo
+$authModel = new AuthModel();
+
+// Verificar qué acción se solicitó
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+    
+    switch ($action) {
+        case 'login':
+            handleLogin($authModel);
+            break;
+        case 'register':
+            handleRegister($authModel);
+            break;
+        case 'forgot_password':
+            handleForgotPassword($authModel);
+            break;
+        default:
+            // Acción no reconocida
+            $_SESSION['error'] = 'Acción no válida';
+            header('Location: ../vista/login-registro.php');
+            exit;
+    }
+} else {
+    // No se permitió el acceso directo al controlador
+    header('Location: ../vista/login-registro.php');
+    exit;
+}
+
+/**
+ * Maneja el proceso de inicio de sesión
+ * @param AuthModel $authModel - Instancia del modelo de autenticación
+ */
+function handleLogin($authModel) {
+    // Obtener y sanitizar datos del formulario
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $password = $_POST['password'] ?? '';
+    
+    // Validación básica
+    if (empty($email) || empty($password)) {
+        $_SESSION['error'] = 'Por favor, complete todos los campos';
+        $_SESSION['form_data'] = $_POST;
+        header('Location: ../vista/login-registro.php?form=login');
+        exit;
+    }
+    
+    // Intentar iniciar sesión
+    $result = $authModel->login($email, $password);
+    
+    if ($result['success']) {
+        // Iniciar sesión
+        $_SESSION['user_id'] = $result['user_id'];
+        $_SESSION['user_email'] = $email;
+        $_SESSION['is_logged_in'] = true;
+        
+        // Redirigir al dashboard o página principal
+        $_SESSION['success'] = '¡Bienvenido de nuevo!';
+        header('Location: ../vista/dashboard.php');
+        exit;
+    } else {
+        // Error de inicio de sesión
+        $_SESSION['error'] = $result['error'] ?? 'Credenciales incorrectas';
+        $_SESSION['form_data'] = ['email' => $email];
+        header('Location: ../vista/login-registro.php?form=login');
+        exit;
+    }
+}
+
+/**
+ * Maneja el proceso de registro de usuario
+ * @param AuthModel $authModel - Instancia del modelo de autenticación
+ */
+function handleRegister($authModel) {
+    // Obtener y sanitizar datos del formulario
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    $password = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+    
+    // Validación básica
+    if (empty($email) || empty($password) || empty($confirmPassword)) {
+        $_SESSION['error'] = 'Por favor, complete todos los campos';
+        $_SESSION['form_data'] = $_POST;
+        header('Location: ../vista/login-registro.php?form=register');
+        exit;
+    }
+    
+    // Verificar que las contraseñas coincidan
+    if ($password !== $confirmPassword) {
+        $_SESSION['error'] = 'Las contraseñas no coinciden';
+        $_SESSION['form_data'] = ['email' => $email];
+        header('Location: ../vista/login-registro.php?form=register');
+        exit;
+    }
+    
+    // Validar fortaleza de la contraseña
+    if (strlen($password) < 8) {
+        $_SESSION['error'] = 'La contraseña debe tener al menos 8 caracteres';
+        $_SESSION['form_data'] = ['email' => $email];
+        header('Location: ../vista/login-registro.php?form=register');
+        exit;
+    }
+    
+    // Intentar registrar al usuario
+    $result = $authModel->register($email, $password);
+    
+    if ($result['success']) {
+        // Registro exitoso
+        $_SESSION['success'] = '¡Registro exitoso! Ahora puedes iniciar sesión';
+        header('Location: ../vista/login-registro.php?form=login');
+        exit;
+    } else {
+        // Error en el registro
+        $_SESSION['error'] = $result['error'] ?? 'Error al registrar el usuario';
+        $_SESSION['form_data'] = ['email' => $email];
+        header('Location: ../vista/login-registro.php?form=register');
+        exit;
+    }
+}
+
+/**
+ * Maneja el proceso de recuperación de contraseña
+ * @param AuthModel $authModel - Instancia del modelo de autenticación
+ */
+function handleForgotPassword($authModel) {
+    // Obtener y sanitizar el correo electrónico
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+    
+    // Validación básica
+    if (empty($email)) {
+        $_SESSION['error'] = 'Por favor, ingrese su correo electrónico';
+        header('Location: ../vista/recuperar-password.php');
+        exit;
+    }
+    
+    // Intentar enviar correo de recuperación
+    $result = $authModel->requestPasswordReset($email);
+    
+    // Siempre mostrar un mensaje de éxito por seguridad, incluso si el correo no existe
+    $_SESSION['success'] = 'Si el correo existe en nuestra base de datos, recibirá instrucciones para restablecer su contraseña';
+    header('Location: ../vista/login-registro.php?form=login');
+    exit;
+}
