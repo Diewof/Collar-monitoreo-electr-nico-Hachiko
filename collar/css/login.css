@@ -254,3 +254,89 @@ body.light-theme .forgot-password a:hover,
 body.light-theme .switch-form:hover {
     color: #333;
 }
+/* Estilos para la validación de correo electrónico */
+.validation-message {
+    font-size: 12px;
+    margin-top: 4px;
+    height: 16px;
+    transition: all 0.3s ease;
+}
+
+.validation-message.valid {
+    color: #4caf50;
+}
+
+.validation-message.invalid {
+    color: #f44336;
+}
+
+input.valid {
+    border-color: #4caf50 !important;
+}
+
+input.invalid {
+    border-color: #f44336 !important;
+}
+
+/* Ajuste para la versión light-theme */
+body.light-theme .validation-message.valid {
+    color: #2e7d32;
+}
+
+body.light-theme .validation-message.invalid {
+    color: #c62828;
+}
+.submit-btn {
+    /* Estilos base del botón (asegúrate que coincidan con tus estilos actuales) */
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.submit-btn:disabled, 
+.submit-btn.disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #e0e0e0;
+    color: #a0a0a0;
+    transform: scale(0.98);
+    box-shadow: none;
+    border-color: #d0d0d0;
+}
+
+.submit-btn:disabled:hover, 
+.submit-btn.disabled:hover {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0) scale(0.98); }
+    20%, 60% { transform: translateX(-2px) scale(0.98); }
+    40%, 80% { transform: translateX(2px) scale(0.98); }
+}
+
+.submit-btn:disabled::after,
+.submit-btn.disabled::after {
+    content: "✗";
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ff4444;
+    font-size: 1.2em;
+}
+
+.submit-btn:not(:disabled):not(.disabled)::after {
+    content: "✓";
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #00aa44;
+    font-size: 1.2em;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.submit-btn:not(:disabled):not(.disabled):hover::after {
+    opacity: 1;
+}
