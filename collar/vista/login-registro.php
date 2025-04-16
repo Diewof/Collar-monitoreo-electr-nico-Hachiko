@@ -32,7 +32,7 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
 </head>
 <body>
     <!-- Botón para cambiar tema -->
-    <button class="theme-toggle" id="theme-toggle">☀️</button>
+    <button class="theme-toggle" id="theme-toggle"><img src="../icons/sun.png" alt="Icono de tema" width="38" height="38"></button>
     
     <div class="container">
         <!-- Mostrar mensajes de error o éxito si existen -->
@@ -52,7 +52,7 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
         <div class="forms">
             <!-- Formulario de Login -->
             <form id="login" action="../controlador/auth.controller.php" method="POST" class="form <?php echo $activeForm === 'login' ? 'active' : ''; ?>">
-                <input type="hidden" name="action", value="login">
+                <input type="hidden" name="action" value="login">
                 
                 <div class="form-header">
                     <span class="icon"><img src="../icons/dogmain.png" alt="Icono de perro" width="38" height="38"></span>
@@ -67,7 +67,9 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
                 <div class="input-group">
                     <span class="input-icon"><img src="../icons/password.png" alt="Icono de contraseña" width="22" height="22"></span>
                     <input type="password" name="password" class="input-field" placeholder="Contraseña" required>
-                    <span class="password-toggle"><img src="../icons/eye.png" alt="Mostrar contraseña" width="20" height="20"></span>
+                    <span class="password-toggle" data-state="closed">
+                        <img src="../icons/close-eye.png" alt="Mostrar contraseña" width="20" height="20">
+                    </span>
                 </div>
                 
                 <button type="submit" class="submit-btn">
@@ -88,7 +90,7 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
             
             <!-- Formulario de Registro -->
             <form id="register" action="../controlador/auth.controller.php" method="POST" class="form <?php echo $activeForm === 'register' ? 'active' : ''; ?>">
-                <input type="hidden" name="action", value="register">
+                <input type="hidden" name="action" value="register">
                 
                 <div class="form-header">
                     <span class="icon"><img src="../icons/dogmain.png" alt="Icono de perro" width="38" height="38"></span>
@@ -103,13 +105,17 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
                 <div class="input-group">
                     <span class="input-icon"><img src="../icons/password.png" alt="Icono de contraseña" width="22" height="22"></span>
                     <input type="password" name="password" class="input-field" placeholder="Contraseña" required>
-                    <span class="password-toggle"><img src="../icons/close-eye.png" alt="Mostrar contraseña" width="20" height="20"></span>
+                    <span class="password-toggle" data-state="closed">
+                        <img src="../icons/close-eye.png" alt="Mostrar contraseña" width="20" height="20">
+                    </span>
                 </div>
                 
                 <div class="input-group">
                     <span class="input-icon"><img src="../icons/password.png" alt="Icono de contraseña" width="22" height="22"></span>
                     <input type="password" name="confirm_password" class="input-field" placeholder="Confirmar Contraseña" required>
-                    <span class="password-toggle"><img src="../icons/close-eye.png" alt="Mostrar contraseña" width="20" height="20"></span>
+                    <span class="password-toggle" data-state="closed">
+                        <img src="../icons/close-eye.png" alt="Mostrar contraseña" width="20" height="20">
+                    </span>
                 </div>
                 
                 <button type="submit" class="submit-btn">

@@ -31,22 +31,25 @@ passwordToggles.forEach(toggle => {
 });
     // Configurar toggle de tema
     if (themeToggle) {
-        // Recuperar preferencia de tema guardada en localStorage
+        // Cambia el themeToggle para usar una imagen con tamaño definido
+        themeToggle.innerHTML = '<img src="../icons/moon.png" alt="Cambiar tema" class="theme-icon" width="30" height="30">';
+        
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'light') {
             document.body.classList.add('light-theme');
-            themeToggle.textContent = '🌙'; // ICONO: Puedes cambiar este icono
+            themeToggle.querySelector('.theme-icon').src = "../icons/sun.png";
         }
         
         themeToggle.addEventListener('click', () => {
             document.body.classList.toggle('light-theme');
+            const themeIcon = themeToggle.querySelector('.theme-icon');
             
             if (document.body.classList.contains('light-theme')) {
                 localStorage.setItem('theme', 'light');
-                themeToggle.textContent = '🌙'; // ICONO: Puedes cambiar este icono
+                themeIcon.src = "../icons/sun.png";
             } else {
                 localStorage.setItem('theme', 'dark');
-                themeToggle.textContent = '☀️'; // ICONO: Puedes cambiar este icono
+                themeIcon.src = "../icons/moon.png";
             }
         });
     }
