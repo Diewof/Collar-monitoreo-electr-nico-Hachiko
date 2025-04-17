@@ -4,10 +4,12 @@
  * Maneja la lógica de datos y la comunicación con la base de datos
  * para los procesos de autenticación
  */
+require_once '../conexion/conexion.php';
+
 class AuthModel {
     /**
      * Conexión a la base de datos
-     * @var PDO
+     * @var mysqli
      */
     private $db;
     
@@ -15,23 +17,11 @@ class AuthModel {
      * Constructor - establece conexión a la base de datos
      */
     public function __construct() {
-        // Configuración de la base de datos (idealmente esto estaría en un archivo de configuración)
-        $host = 'localhost';
-        $dbname = 'auth_system';
-        $username = 'root';
-        $password = '';
+        global $conexion;
+        $this->db = $conexion;
         
-        try {
-            // Crear conexión PDO
-            $this->db = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-            
-            // Configurar errores PDO
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            $this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-        } catch(PDOException $e) {
-            // En producción, no mostrar el mensaje de error directamente
-            error_log("Error de conexión a la BD: " . $e->getMessage());
+        if ($this->db->connect_error) {
+            error_log("Error de conexión a la BD: " . $this->db->connect_error);
             die("Error de conexión a la base de datos. Por favor, contacte al administrador.");
         }
     }
@@ -44,16 +34,19 @@ class AuthModel {
      */
     public function login($email, $password) {
         try {
-            // Preparar la consulta para buscar al usuario por email
+            // Preparar la consulta usando mysqli
             $stmt = $this->db->prepare("SELECT id, email, password FROM users WHERE email = ?");
-            $stmt->execute([$email]);
-            $user = $stmt->fetch();
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $user = $result->fetch_assoc();
             
             // Verificar si el usuario existe y la contraseña es correcta
             if ($user && password_verify($password, $user['password'])) {
                 // Actualizar la última vez que inició sesión
                 $updateStmt = $this->db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
-                $updateStmt->execute([$user['id']]);
+                $updateStmt->bind_param("i", $user['id']);
+                $updateStmt->execute();
                 
                 return [
                     'success' => true,
@@ -65,7 +58,7 @@ class AuthModel {
                     'error' => 'Email o contraseña incorrectos'
                 ];
             }
-        } catch(PDOException $e) {
+        } catch(Exception $e) {
             error_log("Error en login: " . $e->getMessage());
             return [
                 'success' => false,
@@ -84,9 +77,11 @@ class AuthModel {
         try {
             // Verificar si el email ya está registrado
             $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
-            $stmt->execute([$email]);
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
             
-            if ($stmt->rowCount() > 0) {
+            if ($result->num_rows > 0) {
                 return [
                     'success' => false,
                     'error' => 'Este correo electrónico ya está registrado'
@@ -102,13 +97,14 @@ class AuthModel {
                 VALUES (?, ?, NOW())
             ");
             
-            $stmt->execute([$email, $hashedPassword]);
+            $stmt->bind_param("ss", $email, $hashedPassword);
+            $stmt->execute();
             
             return [
                 'success' => true,
-                'user_id' => $this->db->lastInsertId()
+                'user_id' => $this->db->insert_id
             ];
-        } catch(PDOException $e) {
+        } catch(Exception $e) {
             error_log("Error en registro: " . $e->getMessage());
             return [
                 'success' => false,
@@ -126,9 +122,11 @@ class AuthModel {
         try {
             // Verificar si el email existe
             $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
-            $stmt->execute([$email]);
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
             
-            if ($stmt->rowCount() === 0) {
+            if ($result->num_rows === 0) {
                 // No informamos si el correo existe o no por seguridad
                 return [
                     'success' => true
@@ -139,31 +137,35 @@ class AuthModel {
             $token = bin2hex(random_bytes(32));
             $expires = date('Y-m-d H:i:s', time() + 3600); // Expira en 1 hora
             
-            // Guardar token en la base de datos
-            $stmt = $this->db->prepare("
-                INSERT INTO password_resets (email, token, expires_at, created_at) 
-                VALUES (?, ?, ?, NOW())
-                ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at), created_at = NOW()
-            ");
+            // Verificar si ya existe un token para este email
+            $checkStmt = $this->db->prepare("SELECT email FROM password_resets WHERE email = ?");
+            $checkStmt->bind_param("s", $email);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
             
-            $stmt->execute([$email, $token, $expires]);
-            
-            // En una aplicación real, aquí enviaríamos un correo con el enlace para restablecer la contraseña
-            // Por ejemplo, usando PHPMailer o la función mail() de PHP
-            
-            /*
-            $resetLink = "https://tudominio.com/vista/reset-password.php?token=" . $token;
-            $subject = "Restablecer tu contraseña";
-            $message = "Hola,\n\nPara restablecer tu contraseña, haz clic en el siguiente enlace:\n$resetLink\n\nEste enlace expirará en 1 hora.\n\nSi no solicitaste este cambio, puedes ignorar este correo.";
-            $headers = "From: noreply@tudominio.com";
-            
-            mail($email, $subject, $message, $headers);
-            */
+            if ($checkResult->num_rows > 0) {
+                // Actualizar token existente
+                $updateStmt = $this->db->prepare("
+                    UPDATE password_resets 
+                    SET token = ?, expires_at = ?, created_at = NOW() 
+                    WHERE email = ?
+                ");
+                $updateStmt->bind_param("sss", $token, $expires, $email);
+                $updateStmt->execute();
+            } else {
+                // Crear nuevo token
+                $insertStmt = $this->db->prepare("
+                    INSERT INTO password_resets (email, token, expires_at, created_at) 
+                    VALUES (?, ?, ?, NOW())
+                ");
+                $insertStmt->bind_param("sss", $email, $token, $expires);
+                $insertStmt->execute();
+            }
             
             return [
                 'success' => true
             ];
-        } catch(PDOException $e) {
+        } catch(Exception $e) {
             error_log("Error en solicitud de restablecimiento: " . $e->getMessage());
             return [
                 'success' => false,
@@ -184,13 +186,15 @@ class AuthModel {
                 WHERE token = ? AND expires_at > NOW()
             ");
             
-            $stmt->execute([$token]);
-            $result = $stmt->fetch();
+            $stmt->bind_param("s", $token);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = $result->fetch_assoc();
             
-            if ($result) {
+            if ($data) {
                 return [
                     'success' => true,
-                    'email' => $result['email']
+                    'email' => $data['email']
                 ];
             } else {
                 return [
@@ -198,7 +202,7 @@ class AuthModel {
                     'error' => 'Token inválido o expirado'
                 ];
             }
-        } catch(PDOException $e) {
+        } catch(Exception $e) {
             error_log("Error en verificación de token: " . $e->getMessage());
             return [
                 'success' => false,
@@ -220,16 +224,18 @@ class AuthModel {
             
             // Actualizar la contraseña
             $stmt = $this->db->prepare("UPDATE users SET password = ? WHERE email = ?");
-            $stmt->execute([$hashedPassword, $email]);
+            $stmt->bind_param("ss", $hashedPassword, $email);
+            $stmt->execute();
             
             // Eliminar tokens utilizados
             $stmt = $this->db->prepare("DELETE FROM password_resets WHERE email = ?");
-            $stmt->execute([$email]);
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
             
             return [
                 'success' => true
             ];
-        } catch(PDOException $e) {
+        } catch(Exception $e) {
             error_log("Error en restablecimiento de contraseña: " . $e->getMessage());
             return [
                 'success' => false,
