@@ -5,7 +5,7 @@
  */
 
 // Incluir el modelo
-require_once '../modelo/auth.model.php';
+require_once '../modelo/authmodel.php';
 
 // Iniciar sesión
 session_start();
@@ -65,9 +65,9 @@ function handleLogin($authModel) {
         $_SESSION['user_email'] = $email;
         $_SESSION['is_logged_in'] = true;
         
-        // Redirigir al dashboard o página principal
+        // Redirigir a página principal
         $_SESSION['success'] = '¡Bienvenido de nuevo!';
-        header('Location: ../vista/dashboard.php');
+        header('Location: ../vista/main.php');
         exit;
     } else {
         // Error de inicio de sesión

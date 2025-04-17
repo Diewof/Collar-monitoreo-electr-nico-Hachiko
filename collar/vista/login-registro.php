@@ -51,7 +51,7 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
         
         <div class="forms">
             <!-- Formulario de Login -->
-            <form id="login" action="../controlador/auth.controller.php" method="POST" class="form <?php echo $activeForm === 'login' ? 'active' : ''; ?>">
+            <form id="login" action="../control/auth_controller.php" method="POST" class="form <?php echo $activeForm === 'login' ? 'active' : ''; ?>">
                 <input type="hidden" name="action" value="login">
                 
                 <div class="form-header">
@@ -89,7 +89,7 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
             </form>
             
             <!-- Formulario de Registro -->
-            <form id="register" action="../controlador/auth.controller.php" method="POST" class="form <?php echo $activeForm === 'register' ? 'active' : ''; ?>">
+            <form id="register" action="../control/auth_controller.php" method="POST" class="form <?php echo $activeForm === 'register' ? 'active' : ''; ?>">
                 <input type="hidden" name="action" value="register">
                 
                 <div class="form-header">

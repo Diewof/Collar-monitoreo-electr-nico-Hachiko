@@ -85,11 +85,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* Estilos para los campos de entrada */
-.input-group {
-    position: relative;
-    margin-bottom: 5px;
-}
 
 .input-field {
     width: 100%;
@@ -254,12 +249,19 @@ body.light-theme .forgot-password a:hover,
 body.light-theme .switch-form:hover {
     color: #333;
 }
+
 /* Estilos para la validación de correo electrónico */
 .validation-message {
     font-size: 12px;
-    margin-top: 4px;
-    height: 16px;
+    position: absolute;
+    bottom: -18px;
+    left: 40px;
     transition: all 0.3s ease;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 24px; /* Aumentado para dar espacio al mensaje de validación */
 }
 
 .validation-message.valid {
