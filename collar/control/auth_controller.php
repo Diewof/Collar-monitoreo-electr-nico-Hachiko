@@ -27,6 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'forgot_password':
             handleForgotPassword($authModel);
             break;
+        case 'logout':
+            handleLogout();
+            break;
         default:
             // Acción no reconocida
             $_SESSION['error'] = 'Acción no válida';
@@ -64,6 +67,7 @@ function handleLogin($authModel) {
         $_SESSION['user_id'] = $result['user_id'];
         $_SESSION['user_email'] = $email;
         $_SESSION['is_logged_in'] = true;
+        $_SESSION['user_name'] = $result['user_name'] ?? ''; // Agregar nombre de usuario si está disponible
         
         // Redirigir a página principal
         $_SESSION['success'] = '¡Bienvenido de nuevo!';
@@ -150,5 +154,31 @@ function handleForgotPassword($authModel) {
     // Siempre mostrar un mensaje de éxito por seguridad, incluso si el correo no existe
     $_SESSION['success'] = 'Si el correo existe en nuestra base de datos, recibirá instrucciones para restablecer su contraseña';
     header('Location: ../vista/login-registro.php?form=login');
+    exit;
+}
+
+/**
+ * Maneja el proceso de cierre de sesión
+ */
+function handleLogout() {
+    // Destruir todas las variables de sesión
+    $_SESSION = array();
+    
+    // Si se desea destruir la sesión completamente, borre también la cookie de sesión
+    if (ini_get("session.use_cookies")) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000,
+            $params["path"], $params["domain"],
+            $params["secure"], $params["httponly"]
+        );
+    }
+    
+    // Destruir la sesión
+    session_destroy();
+    
+    // Redireccionar al usuario a la página de login
+    session_start(); // Reiniciar sesión para el mensaje
+    $_SESSION['success'] = 'Has cerrado sesión correctamente';
+    header('Location: ../vista/login-registro.php');
     exit;
 }
