@@ -44,14 +44,13 @@ $userEmail = $_SESSION['user_email'] ?? 'Usuario';
                 <span>¡Hachiko!</span>
             </div>
             
-            <div class="search-container">
-                <div class="search-box">
-                    <img src="../icons/search.png" alt="Buscar" class="search-icon" width="18" height="18">
-                    <input type="text" placeholder="Buscar..." class="search-input">
-                </div>
-            </div>
-            
-            <ul class="nav-menu">
+                <div class="search-container">
+        <div class="search-box">
+            <img src="../icons/search.png" alt="Buscar" class="search-icon" width="18" height="18">
+            <input type="text" placeholder="Buscar..." class="search-input">
+        </div>
+        <div id="search-results" class="search-results"></div>
+    </div>
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link">Mi Mascota <img src="../icons/arrow-down.png" alt="Expandir" width="12" height="12"></a>
                     <div class="dropdown-menu">
@@ -273,5 +272,6 @@ $userEmail = $_SESSION['user_email'] ?? 'Usuario';
     
     <!-- Scripts -->
     <script src="../js/main.js"></script>
+    <script src="../js/search.js"></script> 
 </body>
 </html>

@@ -600,6 +600,58 @@ body.light-theme {
     object-fit: cover;
 }
 
+/* Estilos para el contenedor de resultados de búsqueda */
+.search-container {
+    position: relative;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 1200;
+    margin-top: 5px;
+    border: 1px solid var(--border-color);
+    display: none;
+}
+
+.search-results.active {
+    display: block;
+}
+
+.search-category {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 8px 15px 5px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-result-item {
+    display: block;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: var(--text-color);
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Estilo para resaltar el texto coincidente */
+.search-highlight {
+    font-weight: 600;
+    color: #3a86ff;
+}
+
 .testimonial-card p {
     color: var(--text-secondary);
     font-size: 1rem;
@@ -682,3 +734,4 @@ section h2:after {
         .alert-info {
             background-color: #17a2b8;
         }
+        
