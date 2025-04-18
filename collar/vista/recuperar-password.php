@@ -50,7 +50,7 @@ if(isset($_SESSION['form_data'])) unset($_SESSION['form_data']);
             
             <p class="form-info">Ingresa tu correo electrónico y te enviaremos instrucciones para restablecer tu contraseña.</p>
             
-            <form action="../controlador/auth_controller.php" method="POST">
+            <form action="../control/auth_controller.php" method="POST">
                 <input type="hidden" name="action" value="forgot_password">
                 
                 <div class="input-group">

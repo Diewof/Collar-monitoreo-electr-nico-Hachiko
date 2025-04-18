@@ -51,6 +51,9 @@ function handleLogin($authModel) {
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'] ?? '';
     
+    // Obtener dirección IP del cliente
+    $ip_address = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    
     // Validación básica
     if (empty($email) || empty($password)) {
         $_SESSION['error'] = 'Por favor, complete todos los campos';
@@ -59,8 +62,17 @@ function handleLogin($authModel) {
         exit;
     }
     
+    // Verificar si la cuenta está bloqueada antes de intentar iniciar sesión
+    $lockStatus = $authModel->isUserLocked($email, $ip_address);
+    if ($lockStatus['locked']) {
+        $_SESSION['error'] = "Demasiados intentos fallidos. Cuenta bloqueada por " . $lockStatus['minutes_left'] . " minutos.";
+        $_SESSION['form_data'] = ['email' => $email];
+        header('Location: ../vista/login-registro.php?form=login');
+        exit;
+    }
+    
     // Intentar iniciar sesión
-    $result = $authModel->login($email, $password);
+    $result = $authModel->login($email, $password, $ip_address);
     
     if ($result['success']) {
         // Iniciar sesión

@@ -27,13 +27,120 @@ class AuthModel {
     }
     
     /**
+     * Verifica si un usuario está bloqueado por intentos fallidos de login
+     * @param string $email Correo electrónico del usuario
+     * @param string $ip_address Dirección IP del cliente
+     * @return array Estado de bloqueo y tiempo restante
+     */
+    public function isUserLocked($email, $ip_address) {
+        try {
+            // Eliminamos registros antiguos (más de 15 minutos)
+            $this->cleanupLoginAttempts();
+            
+            // Contamos los intentos fallidos en los últimos 15 minutos
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as attempts, 
+                       MAX(attempt_time) as last_attempt,
+                       TIMESTAMPDIFF(SECOND, NOW(), DATE_ADD(MAX(attempt_time), INTERVAL 15 MINUTE)) as seconds_left
+                FROM login_attempts 
+                WHERE (email = ? OR ip_address = ?)
+                AND attempt_time > (NOW() - INTERVAL 15 MINUTE)
+            ");
+            $stmt->bind_param("ss", $email, $ip_address);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = $result->fetch_assoc();
+            
+            // Si hay 3 o más intentos fallidos, bloqueamos
+            if ($data['attempts'] >= 3) {
+                // Usamos el tiempo restante calculado directamente por MySQL
+                $time_left = max(0, $data['seconds_left']);
+                
+                return [
+                    'locked' => true,
+                    'time_left' => $time_left, // Tiempo restante en segundos
+                    'minutes_left' => ceil($time_left / 60) // Minutos restantes (redondeado hacia arriba)
+                ];
+            }
+            
+            return ['locked' => false];
+        } catch(Exception $e) {
+            error_log("Error al verificar bloqueo: " . $e->getMessage());
+            // En caso de error, permitimos el acceso para evitar bloqueos permanentes
+            return ['locked' => false];
+        }
+    }
+    /**
+     * Registra un intento fallido de login
+     * @param string $email Correo electrónico del usuario
+     * @param string $ip_address Dirección IP del cliente
+     */
+    public function recordFailedAttempt($email, $ip_address) {
+        try {
+            $stmt = $this->db->prepare("
+                INSERT INTO login_attempts (email, ip_address) 
+                VALUES (?, ?)
+            ");
+            $stmt->bind_param("ss", $email, $ip_address);
+            $stmt->execute();
+        } catch(Exception $e) {
+            error_log("Error al registrar intento fallido: " . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Elimina los registros de intentos fallidos para un usuario
+     * @param string $email Correo electrónico del usuario
+     * @param string $ip_address Dirección IP del cliente
+     */
+    public function clearFailedAttempts($email, $ip_address) {
+        try {
+            $stmt = $this->db->prepare("
+                DELETE FROM login_attempts 
+                WHERE email = ? OR ip_address = ?
+            ");
+            $stmt->bind_param("ss", $email, $ip_address);
+            $stmt->execute();
+        } catch(Exception $e) {
+            error_log("Error al limpiar intentos fallidos: " . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Elimina registros antiguos de intentos fallidos (más de 15 minutos)
+     */
+    private function cleanupLoginAttempts() {
+        try {
+            $stmt = $this->db->prepare("
+                DELETE FROM login_attempts 
+                WHERE attempt_time < (NOW() - INTERVAL 15 MINUTE)
+            ");
+            $stmt->execute();
+        } catch(Exception $e) {
+            error_log("Error al limpiar intentos fallidos antiguos: " . $e->getMessage());
+        }
+    }
+    
+    /**
      * Realiza el proceso de login
      * @param string $email Correo electrónico del usuario
      * @param string $password Contraseña del usuario
+     * @param string $ip_address Dirección IP del cliente
      * @return array Resultado de la operación
      */
-    public function login($email, $password) {
+    public function login($email, $password, $ip_address) {
         try {
+            // Verificar si el usuario está bloqueado
+            $lockStatus = $this->isUserLocked($email, $ip_address);
+            if ($lockStatus['locked']) {
+                return [
+                    'success' => false,
+                    'locked' => true,
+                    'minutes_left' => $lockStatus['minutes_left'],
+                    'error' => "Demasiados intentos fallidos. Cuenta bloqueada por " . $lockStatus['minutes_left'] . " minutos."
+                ];
+            }
+            
             // Preparar la consulta usando mysqli
             $stmt = $this->db->prepare("SELECT id, email, password FROM users WHERE email = ?");
             $stmt->bind_param("s", $email);
@@ -48,14 +155,34 @@ class AuthModel {
                 $updateStmt->bind_param("i", $user['id']);
                 $updateStmt->execute();
                 
+                // Limpiar intentos fallidos al iniciar sesión correctamente
+                $this->clearFailedAttempts($email, $ip_address);
+                
                 return [
                     'success' => true,
                     'user_id' => $user['id']
                 ];
             } else {
+                // Registrar intento fallido
+                $this->recordFailedAttempt($email, $ip_address);
+                
+                // Verificar si este intento ha causado un bloqueo
+                $updatedLockStatus = $this->isUserLocked($email, $ip_address);
+                if ($updatedLockStatus['locked']) {
+                    return [
+                        'success' => false,
+                        'locked' => true,
+                        'minutes_left' => $updatedLockStatus['minutes_left'],
+                        'error' => "Demasiados intentos fallidos. Cuenta bloqueada por " . $updatedLockStatus['minutes_left'] . " minutos."
+                    ];
+                }
+                
+                // Calculamos los intentos restantes antes del bloqueo
+                $attemptsLeft = 3 - $this->getFailedAttemptsCount($email, $ip_address);
+                
                 return [
                     'success' => false,
-                    'error' => 'Email o contraseña incorrectos'
+                    'error' => 'Email o contraseña incorrectos. Intentos restantes: ' . $attemptsLeft
                 ];
             }
         } catch(Exception $e) {
@@ -64,6 +191,32 @@ class AuthModel {
                 'success' => false,
                 'error' => 'Error al iniciar sesión. Por favor, intente nuevamente.'
             ];
+        }
+    }
+    
+    /**
+     * Obtiene el número de intentos fallidos para un usuario
+     * @param string $email Correo electrónico del usuario
+     * @param string $ip_address Dirección IP del cliente
+     * @return int Número de intentos fallidos
+     */
+    private function getFailedAttemptsCount($email, $ip_address) {
+        try {
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as attempts
+                FROM login_attempts 
+                WHERE (email = ? OR ip_address = ?)
+                AND attempt_time > (NOW() - INTERVAL 15 MINUTE)
+            ");
+            $stmt->bind_param("ss", $email, $ip_address);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = $result->fetch_assoc();
+            
+            return $data['attempts'];
+        } catch(Exception $e) {
+            error_log("Error al contar intentos fallidos: " . $e->getMessage());
+            return 0;
         }
     }
     
