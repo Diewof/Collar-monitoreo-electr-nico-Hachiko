@@ -16,6 +16,66 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalSlides = carouselItems.length;
     let carouselInterval;
     
+// Variables para el temporizador de inactividad
+let inactivityTimeout;
+const inactivityTime = 15 * 60 * 1000; // Tiempo real para cerrar sesión
+let inactivitySeconds = 15 * 60; // Contador visual para el logout
+let timerInterval;
+const timerDisplay = document.getElementById('timer-countdown');
+
+// Función para reiniciar ambos temporizadores
+function resetTimers() {
+    resetInactivityTimer();
+    resetVisualTimer();
+}
+
+// Función para reiniciar el temporizador de inactividad
+function resetInactivityTimer() {
+    // Limpiar el temporizador anterior si existe
+    clearTimeout(inactivityTimeout);
+
+    // Establecer un nuevo temporizador de inactividad
+    inactivityTimeout = setTimeout(() => {
+        window.location.href = '../control/auto_logout.php';
+    }, inactivityTime);
+}
+
+// Función para actualizar la visualización del temporizador
+function updateTimerDisplay() {
+    const minutes = Math.floor(inactivitySeconds / 60);
+    const seconds = inactivitySeconds % 60;
+
+    // Formatear el tiempo como MM:SS
+    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    // Disminuir el contador
+    inactivitySeconds--;
+
+    // Redirigir al cerrar sesión si el tiempo se agota
+    if (inactivitySeconds < 0) {
+        clearInterval(timerInterval);
+        window.location.href = '../control/auto_logout.php';
+    }
+}
+
+// Función para reiniciar el temporizador visual
+function resetVisualTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    inactivitySeconds = 15 * 60; // Resetear a 15 minutos
+    updateTimerDisplay();
+    timerInterval = setInterval(updateTimerDisplay, 1000);
+}
+
+// Eventos que reinician ambos temporizadores
+['mousemove', 'keypress', 'click', 'scroll'].forEach(event => {
+    document.addEventListener(event, resetTimers);
+});
+
+// Iniciar ambos temporizadores al cargar la página
+resetTimers();
+
     // Configurar toggle de tema
     if (themeToggle) {
         const themeIcon = themeToggle.querySelector('.theme-icon');

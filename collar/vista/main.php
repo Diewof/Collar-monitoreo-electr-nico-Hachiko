@@ -31,6 +31,11 @@ $userEmail = $_SESSION['user_email'] ?? 'Usuario';
         <img src="../icons/moon.png" alt="Cambiar tema" class="theme-icon" width="30" height="30">
     </button>
     
+    <!-- Temporizador de inactividad -->
+    <div class="inactivity-timer" id="inactivity-timer">⏰
+        <span id="timer-countdown">15:00</span> de inactividad antes de cerrar sesión
+    </div>
+    
     <!-- Barra de navegación -->
     <nav class="navbar">
         <div class="nav-container">
@@ -110,6 +115,15 @@ $userEmail = $_SESSION['user_email'] ?? 'Usuario';
         <?php 
             echo htmlspecialchars($_SESSION['error']); 
             unset($_SESSION['error']);
+        ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['info'])): ?>
+    <div class="alert alert-info">
+        <?php 
+            echo htmlspecialchars($_SESSION['info']); 
+            unset($_SESSION['info']);
         ?>
     </div>
     <?php endif; ?>
@@ -242,7 +256,7 @@ $userEmail = $_SESSION['user_email'] ?? 'Usuario';
                 </div>
             </div>
         </section>
-        
+    </main>
     
     <!-- Pie de página -->
     <footer class="footer">

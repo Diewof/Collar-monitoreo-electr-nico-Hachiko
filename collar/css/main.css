@@ -634,3 +634,51 @@ section h2:after {
     height: 3px;
     background-color: var(--primary-color);
 }
+        /* Estilos para el temporizador de inactividad */
+        .inactivity-timer {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-color);
+            transition: opacity 0.3s ease;
+            opacity: 0.7;
+        }
+        
+        .inactivity-timer:hover {
+            opacity: 1;
+        }
+        
+        .timer-icon {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            color: white;
+            text-align: center;
+        }
+        
+        .alert-success {
+            background-color: #28a745;
+        }
+        
+        .alert-error {
+            background-color: #dc3545;
+        }
+        
+        .alert-info {
+            background-color: #17a2b8;
+        }

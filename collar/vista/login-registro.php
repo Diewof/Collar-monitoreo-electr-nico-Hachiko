@@ -2,9 +2,10 @@
 // Iniciar sesión
 session_start();
 
-// Verificar si hay algún mensaje de error o éxito
+// Verificar si hay algún mensaje de error, éxito o información
 $errorMsg = $_SESSION['error'] ?? '';
 $successMsg = $_SESSION['success'] ?? '';
+$infoMsg = $_GET['info'] ?? ($_SESSION['info'] ?? '');
 
 // Limpiar mensajes de sesión después de mostrarlos
 if(isset($_SESSION['error'])) unset($_SESSION['error']);
@@ -42,6 +43,10 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
         
         <?php if(!empty($successMsg)): ?>
             <div class="message success"><?php echo htmlspecialchars($successMsg); ?></div>
+        <?php endif; ?>
+        <?php if (isset($_GET['info'])): ?>
+            <div class="alert alert-info">
+                <?php echo htmlspecialchars($_GET['info']); ?></div>
         <?php endif; ?>
     
         <div class="tabs">
