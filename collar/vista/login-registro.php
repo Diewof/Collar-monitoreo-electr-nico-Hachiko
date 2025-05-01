@@ -33,7 +33,7 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
 </head>
 <body>
     <!-- Botón para cambiar tema -->
-    <button class="theme-toggle" id="theme-toggle"><img src="../icons/sun.png" alt="Icono de tema" width="38" height="38"></button>
+    <button class="theme-toggle" id="theme-toggle"><img src="../icons/sun.avif" alt="Icono de tema" width="38" height="38"></button>
     
     <div class="container">
         <!-- Mostrar mensajes de error o éxito si existen -->
@@ -60,25 +60,25 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
                 <input type="hidden" name="action" value="login">
                 
                 <div class="form-header">
-                    <span class="icon"><img src="../icons/dogmain.png" alt="Icono de perro" width="38" height="38"></span>
+                    <span class="icon"><img src="../icons/dogmain.avif" alt="Icono de perro" width="38" height="38"></span>
                     <h2>Iniciar Sesión</h2>
                 </div>
                 
                 <div class="input-group">
-                    <span class="input-icon"><img src="../icons/email.png" alt="Icono de email" width="22" height="22"></span>
+                    <span class="input-icon"><img src="../icons/email.avif" alt="Icono de email" width="22" height="22"></span>
                     <input type="email" name="email" class="input-field" placeholder="Correo Electrónico" value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>" required>
                 </div>
                 
                 <div class="input-group">
-                    <span class="input-icon"><img src="../icons/password.png" alt="Icono de contraseña" width="22" height="22"></span>
+                    <span class="input-icon"><img src="../icons/password.avif" alt="Icono de contraseña" width="22" height="22"></span>
                     <input type="password" name="password" class="input-field" placeholder="Contraseña" required>
                     <span class="password-toggle" data-state="closed">
-                        <img src="../icons/close-eye.png" alt="Mostrar contraseña" width="20" height="20">
+                        <img src="../icons/close-eye.avif" alt="Mostrar contraseña" width="20" height="20">
                     </span>
                 </div>
                 
                 <button type="submit" class="submit-btn">
-                    <span class="btn-icon"><img src="../icons/login.png" alt="Icono de inicio de sesión" width="24" height="24"></span>
+                    <span class="btn-icon"><img src="../icons/login.avif" alt="Icono de inicio de sesión" width="24" height="24"></span>
                     Iniciar Sesión
                 </button>
                 
@@ -98,33 +98,33 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
                 <input type="hidden" name="action" value="register">
                 
                 <div class="form-header">
-                    <span class="icon"><img src="../icons/dogmain.png" alt="Icono de perro" width="38" height="38"></span>
+                    <span class="icon"><img src="../icons/dogmain.avif" alt="Icono de perro" width="38" height="38"></span>
                     <h2>Registrarse</h2>
                 </div>
                 
                 <div class="input-group">
-                    <span class="input-icon"><img src="../icons/email.png" alt="Icono de email" width="22" height="22"></span>
+                    <span class="input-icon"><img src="../icons/email.avif" alt="Icono de email" width="22" height="22"></span>
                     <input type="email" name="email" class="input-field" placeholder="Correo Electrónico" value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>" required>
                 </div>
                 
                 <div class="input-group">
-                    <span class="input-icon"><img src="../icons/password.png" alt="Icono de contraseña" width="22" height="22"></span>
+                    <span class="input-icon"><img src="../icons/password.avif" alt="Icono de contraseña" width="22" height="22"></span>
                     <input type="password" name="password" class="input-field" placeholder="Contraseña" required>
                     <span class="password-toggle" data-state="closed">
-                        <img src="../icons/close-eye.png" alt="Mostrar contraseña" width="20" height="20">
+                        <img src="../icons/close-eye.avif" alt="Mostrar contraseña" width="20" height="20">
                     </span>
                 </div>
                 
                 <div class="input-group">
-                    <span class="input-icon"><img src="../icons/password.png" alt="Icono de contraseña" width="22" height="22"></span>
+                    <span class="input-icon"><img src="../icons/password.avif" alt="Icono de contraseña" width="22" height="22"></span>
                     <input type="password" name="confirm_password" class="input-field" placeholder="Confirmar Contraseña" required>
                     <span class="password-toggle" data-state="closed">
-                        <img src="../icons/close-eye.png" alt="Mostrar contraseña" width="20" height="20">
+                        <img src="../icons/close-eye.avif" alt="Mostrar contraseña" width="20" height="20">
                     </span>
                 </div>
                 
                 <button type="submit" class="submit-btn">
-                    <span class="btn-icon"><img src="../icons/register.png" alt="Icono de registro" width="24" height="24"></span>
+                    <span class="btn-icon"><img src="../icons/register.avif" alt="Icono de registro" width="24" height="24"></span>
                     Registrarse
                 </button>
                 

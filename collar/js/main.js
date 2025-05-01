@@ -83,7 +83,7 @@ resetTimers();
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'light') {
             document.body.classList.add('light-theme');
-            themeIcon.src = "../icons/sun.png";
+            themeIcon.src = "../icons/sun.avif";
         }
         
         themeToggle.addEventListener('click', () => {
@@ -91,10 +91,10 @@ resetTimers();
             
             if (document.body.classList.contains('light-theme')) {
                 localStorage.setItem('theme', 'light');
-                themeIcon.src = "../icons/sun.png";
+                themeIcon.src = "../icons/sun.avif";
             } else {
                 localStorage.setItem('theme', 'dark');
-                themeIcon.src = "../icons/moon.png";
+                themeIcon.src = "../icons/moon.avif";
             }
         });
     }

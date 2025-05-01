@@ -18,12 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (input.type === 'password') {
                 input.type = 'text';
-                eyeIcon.src = "../icons/eye.png";
+                eyeIcon.src = "../icons/eye.avif";
                 eyeIcon.alt = "Ocultar contraseña";
                 eyeIcon.dataset.state = "open";
             } else {
                 input.type = 'password';
-                eyeIcon.src = "../icons/close-eye.png";
+                eyeIcon.src = "../icons/close-eye.avif";
                 eyeIcon.alt = "Mostrar contraseña";
                 eyeIcon.dataset.state = "closed";
             }
@@ -32,12 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Configurar toggle de tema
     if (themeToggle) {
-        themeToggle.innerHTML = '<img src="../icons/moon.png" alt="Cambiar tema" class="theme-icon" width="30" height="30">';
+        themeToggle.innerHTML = '<img src="../icons/moon.avif" alt="Cambiar tema" class="theme-icon" width="30" height="30">';
         
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'light') {
             document.body.classList.add('light-theme');
-            themeToggle.querySelector('.theme-icon').src = "../icons/sun.png";
+            themeToggle.querySelector('.theme-icon').src = "../icons/sun.avif";
         }
         
         themeToggle.addEventListener('click', () => {
@@ -46,10 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (document.body.classList.contains('light-theme')) {
                 localStorage.setItem('theme', 'light');
-                themeIcon.src = "../icons/sun.png";
+                themeIcon.src = "../icons/sun.avif";
             } else {
                 localStorage.setItem('theme', 'dark');
-                themeIcon.src = "../icons/moon.png";
+                themeIcon.src = "../icons/moon.avif";
             }
         });
     }

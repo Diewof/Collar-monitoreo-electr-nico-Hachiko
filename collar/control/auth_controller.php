@@ -46,6 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  * Maneja el proceso de inicio de sesión
  * @param AuthModel $authModel - Instancia del modelo de autenticación
  */
+/**
+ * Maneja el proceso de inicio de sesión
+ * @param AuthModel $authModel - Instancia del modelo de autenticación
+ */
 function handleLogin($authModel) {
     // Obtener y sanitizar datos del formulario
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
@@ -79,11 +83,16 @@ function handleLogin($authModel) {
         $_SESSION['user_id'] = $result['user_id'];
         $_SESSION['user_email'] = $email;
         $_SESSION['is_logged_in'] = true;
-        $_SESSION['user_name'] = $result['user_name'] ?? ''; // Agregar nombre de usuario si está disponible
+        $_SESSION['user_role'] = $result['user_role'] ?? 'user'; // Guardar el rol del usuario
         
-        // Redirigir a página principal
+        // Redirigir según el rol del usuario
         $_SESSION['success'] = '¡Bienvenido de nuevo!';
-        header('Location: ../vista/main.php');
+        
+        if ($_SESSION['user_role'] === 'admin') {
+            header('Location: ../vista/admin_main.php');
+        } else {
+            header('Location: ../vista/main.php');
+        }
         exit;
     } else {
         // Error de inicio de sesión

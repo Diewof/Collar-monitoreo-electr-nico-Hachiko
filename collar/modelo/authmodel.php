@@ -121,79 +121,79 @@ class AuthModel {
         }
     }
     
-    /**
-     * Realiza el proceso de login
-     * @param string $email Correo electrónico del usuario
-     * @param string $password Contraseña del usuario
-     * @param string $ip_address Dirección IP del cliente
-     * @return array Resultado de la operación
-     */
-    public function login($email, $password, $ip_address) {
-        try {
-            // Verificar si el usuario está bloqueado
-            $lockStatus = $this->isUserLocked($email, $ip_address);
-            if ($lockStatus['locked']) {
+/**
+ * Realiza el proceso de login
+ * @param string $email Correo electrónico del usuario
+ * @param string $password Contraseña del usuario
+ * @param string $ip_address Dirección IP del cliente
+ * @return array Resultado de la operación
+ */
+public function login($email, $password, $ip_address) {
+    try {
+        // Verificar si el usuario está bloqueado
+        $lockStatus = $this->isUserLocked($email, $ip_address);
+        if ($lockStatus['locked']) {
+            return [
+                'success' => false,
+                'locked' => true,
+                'minutes_left' => $lockStatus['minutes_left'],
+                'error' => "Demasiados intentos fallidos. Cuenta bloqueada por " . $lockStatus['minutes_left'] . " minutos."
+            ];
+        }
+        
+        // Preparar la consulta usando mysqli
+        $stmt = $this->db->prepare("SELECT id, email, password, role FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        
+        // Verificar si el usuario existe y la contraseña es correcta
+        if ($user && password_verify($password, $user['password'])) {
+            // Actualizar la última vez que inició sesión
+            $updateStmt = $this->db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+            $updateStmt->bind_param("i", $user['id']);
+            $updateStmt->execute();
+            
+            // Limpiar intentos fallidos al iniciar sesión correctamente
+            $this->clearFailedAttempts($email, $ip_address);
+            
+            return [
+                'success' => true,
+                'user_id' => $user['id'],
+                'user_role' => $user['role'] // Incluir el rol del usuario
+            ];
+        } else {
+            // Registrar intento fallido
+            $this->recordFailedAttempt($email, $ip_address);
+            
+            // Verificar si este intento ha causado un bloqueo
+            $updatedLockStatus = $this->isUserLocked($email, $ip_address);
+            if ($updatedLockStatus['locked']) {
                 return [
                     'success' => false,
                     'locked' => true,
-                    'minutes_left' => $lockStatus['minutes_left'],
-                    'error' => "Demasiados intentos fallidos. Cuenta bloqueada por " . $lockStatus['minutes_left'] . " minutos."
+                    'minutes_left' => $updatedLockStatus['minutes_left'],
+                    'error' => "Demasiados intentos fallidos. Cuenta bloqueada por " . $updatedLockStatus['minutes_left'] . " minutos."
                 ];
             }
             
-            // Preparar la consulta usando mysqli
-            $stmt = $this->db->prepare("SELECT id, email, password FROM users WHERE email = ?");
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $user = $result->fetch_assoc();
+            // Calculamos los intentos restantes antes del bloqueo
+            $attemptsLeft = 3 - $this->getFailedAttemptsCount($email, $ip_address);
             
-            // Verificar si el usuario existe y la contraseña es correcta
-            if ($user && password_verify($password, $user['password'])) {
-                // Actualizar la última vez que inició sesión
-                $updateStmt = $this->db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
-                $updateStmt->bind_param("i", $user['id']);
-                $updateStmt->execute();
-                
-                // Limpiar intentos fallidos al iniciar sesión correctamente
-                $this->clearFailedAttempts($email, $ip_address);
-                
-                return [
-                    'success' => true,
-                    'user_id' => $user['id']
-                ];
-            } else {
-                // Registrar intento fallido
-                $this->recordFailedAttempt($email, $ip_address);
-                
-                // Verificar si este intento ha causado un bloqueo
-                $updatedLockStatus = $this->isUserLocked($email, $ip_address);
-                if ($updatedLockStatus['locked']) {
-                    return [
-                        'success' => false,
-                        'locked' => true,
-                        'minutes_left' => $updatedLockStatus['minutes_left'],
-                        'error' => "Demasiados intentos fallidos. Cuenta bloqueada por " . $updatedLockStatus['minutes_left'] . " minutos."
-                    ];
-                }
-                
-                // Calculamos los intentos restantes antes del bloqueo
-                $attemptsLeft = 3 - $this->getFailedAttemptsCount($email, $ip_address);
-                
-                return [
-                    'success' => false,
-                    'error' => 'Email o contraseña incorrectos. Intentos restantes: ' . $attemptsLeft
-                ];
-            }
-        } catch(Exception $e) {
-            error_log("Error en login: " . $e->getMessage());
             return [
                 'success' => false,
-                'error' => 'Error al iniciar sesión. Por favor, intente nuevamente.'
+                'error' => 'Email o contraseña incorrectos. Intentos restantes: ' . $attemptsLeft
             ];
         }
+    } catch(Exception $e) {
+        error_log("Error en login: " . $e->getMessage());
+        return [
+            'success' => false,
+            'error' => 'Error al iniciar sesión. Por favor, intente nuevamente.'
+        ];
     }
-    
+}
     /**
      * Obtiene el número de intentos fallidos para un usuario
      * @param string $email Correo electrónico del usuario
