@@ -6,12 +6,16 @@ session_start();
 require_once '../conexion/conexion.php';
 require_once '../modelo/admin_model.php';
 require_once '../control/admin_controller.php';
-
+require_once '../control/BaseController.php';
+require_once 'components/Notification.php';
 
 // Verificar si el usuario ha iniciado sesión y es administrador
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true || $_SESSION['user_role'] !== 'admin') {
     // Si no es administrador, redirigir al login
-    $_SESSION['error'] = 'Acceso denegado. Necesita credenciales de administrador.';
+    $_SESSION['notification'] = [
+        'message' => 'Acceso denegado. Necesita credenciales de administrador.',
+        'type' => 'error'
+    ];
     header('Location: login-registro.php');
     exit;
 }
@@ -47,6 +51,9 @@ function timeAgo($datetime) {
 
 // Determinar la sección a mostrar
 $section = $_GET['section'] ?? 'dashboard';
+
+// Mostrar notificaciones
+BaseController::showNotification();
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -370,12 +377,18 @@ $section = $_GET['section'] ?? 'dashboard';
                     
                     <div class="form-group">
                         <label for="email">Correo Electrónico:</label>
-                        <input type="email" id="email" name="email" class="form-control" required>
+                        <input type="email" id="email" name="email" class="form-control" 
+                               minlength="10" maxlength="45" required
+                               pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                               title="El correo debe tener entre 10 y 45 caracteres y un formato válido">
                     </div>
                     
                     <div class="form-group">
                         <label for="password">Contraseña:</label>
-                        <input type="password" id="password" name="password" class="form-control" required>
+                        <input type="password" id="password" name="password" class="form-control" 
+                               minlength="8" maxlength="25" required
+                               pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
+                               title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
                         <div class="password-strength-meter">
                             <div class="strength-bar"></div>
                         </div>
@@ -383,7 +396,10 @@ $section = $_GET['section'] ?? 'dashboard';
                     
                     <div class="form-group">
                         <label for="confirm_password">Confirmar Contraseña:</label>
-                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" 
+                               minlength="8" maxlength="25" required
+                               pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
+                               title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
                     </div>
                     
                     <div class="form-group">
@@ -520,12 +536,18 @@ $section = $_GET['section'] ?? 'dashboard';
 
             <div class="form-group">
                 <label for="edit-email">Correo Electrónico:</label>
-                <input type="email" id="edit-email" name="email" class="form-control" required>
+                <input type="email" id="edit-email" name="email" class="form-control" 
+                       minlength="10" maxlength="45" required
+                       pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                       title="El correo debe tener entre 10 y 45 caracteres y un formato válido">
             </div>
 
             <div class="form-group">
                 <label for="edit-password">Nueva Contraseña (dejar en blanco para mantener la actual):</label>
-                <input type="password" id="edit-password" name="password" class="form-control">
+                <input type="password" id="edit-password" name="password" class="form-control"
+                       minlength="8" maxlength="25"
+                       pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
+                       title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
                 <div class="password-strength-meter">
                     <div class="strength-bar"></div>
                 </div>
@@ -533,7 +555,10 @@ $section = $_GET['section'] ?? 'dashboard';
 
             <div class="form-group">
                 <label for="edit-confirm-password">Confirmar Nueva Contraseña:</label>
-                <input type="password" id="edit-confirm-password" name="confirm_password" class="form-control">
+                <input type="password" id="edit-confirm-password" name="confirm_password" class="form-control"
+                       minlength="8" maxlength="25"
+                       pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
+                       title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
             </div>
 
             <div class="form-group">
@@ -545,11 +570,65 @@ $section = $_GET['section'] ?? 'dashboard';
             </div>
 
             <div class="form-group">
-                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                <button type="button" class="btn btn-secondary close-modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary btn-modal">Guardar Cambios</button>
+                <button type="button" class="btn btn-secondary btn-modal close-modal">Cancelar</button>
             </div>
         </form>
     </div>
 </div>
+<style>
+    .btn-modal {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        margin: 0 5px;
+    }
+
+    .btn-primary.btn-modal {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .btn-primary.btn-modal:hover {
+        background-color: #45a049;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .btn-secondary.btn-modal {
+        background-color: #f44336;
+        color: white;
+    }
+
+    .btn-secondary.btn-modal:hover {
+        background-color: #da190b;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary {
+        background-color: #2196F3;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #1976D2;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+</style>
 </body>
 </html>

@@ -7,11 +7,13 @@ if (session_status() == PHP_SESSION_NONE) {
 // Incluir archivos necesarios
 require_once '../modelo/admin_model.php';
 require_once '../conexion/conexion.php';
+require_once 'BaseController.php';
 
-class AdminController {
+class AdminController extends BaseController {
     private $adminModel;
     
     public function __construct() {
+        parent::__construct();
         global $conexion;
         $this->adminModel = new AdminModel($conexion);
     }
@@ -20,13 +22,10 @@ class AdminController {
      * Procesa la acción solicitada para el panel de administración
      */
     public function processRequest() {
-        // Verificar si el usuario tiene permisos de administrador
         if (!$this->checkAdminAccess()) {
-            $this->redirectToLogin();
-            return;
+            $this->redirect('../login-registro.php', 'Acceso denegado. Necesita credenciales de administrador.', 'error');
         }
         
-        // Obtener la acción solicitada
         $action = $_POST['action'] ?? $_GET['action'] ?? 'dashboard';
         
         switch ($action) {
@@ -51,9 +50,7 @@ class AdminController {
                 break;
                 
             default:
-                // Acción desconocida, redirigir al dashboard
-                header('Location: ../vista/admin_main.php');
-                exit;
+                $this->redirect('../vista/admin_main.php');
         }
     }
     
@@ -70,52 +67,31 @@ class AdminController {
     }
 
     /**
- * Actualiza los datos de un usuario
- */
-private function updateUser() {
-    if (!isset($_POST['user_id']) || !is_numeric($_POST['user_id'])) {
-        $_SESSION['error'] = 'ID de usuario inválido.';
-        header('Location: ../vista/admin_main.php');
-        exit;
-    }
-    
-    $userId = (int) $_POST['user_id'];
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $role = $_POST['role'] ?? 'usuario';
-    
-    // Validar email
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['error'] = 'Formato de email inválido.';
-        header('Location: ../vista/admin_main.php');
-        exit;
-    }
-    
-    // Validar rol
-    if (!in_array($role, ['admin', 'usuario'])) {
-        $_SESSION['error'] = 'Rol inválido.';
-        header('Location: ../vista/admin_main.php');
-        exit;
-    }
-    
-    // Actualizar usuario en el modelo
-    if ($this->adminModel->updateUser($userId, $email, $password, $role)) {
-        $_SESSION['success'] = 'Usuario actualizado correctamente.';
-    } else {
-        $_SESSION['error'] = 'Error al actualizar el usuario.';
-    }
-    
-    header('Location: ../vista/admin_main.php');
-    exit;
-}
-    
-    /**
-     * Redirige al usuario a la página de login con un mensaje de error
+     * Actualiza los datos de un usuario
      */
-    private function redirectToLogin() {
-        $_SESSION['error'] = 'Acceso denegado. Necesita credenciales de administrador.';
-        header('Location: ../login-registro.php');
-        exit;
+    private function updateUser() {
+        if (!isset($_POST['user_id']) || !is_numeric($_POST['user_id'])) {
+            $this->redirect('../vista/admin_main.php', 'ID de usuario inválido.', 'error');
+        }
+        
+        $userId = (int) $_POST['user_id'];
+        $email = $this->sanitizeEmail($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $role = $_POST['role'] ?? 'usuario';
+        
+        if (!$this->validateEmail($email)) {
+            $this->redirect('../vista/admin_main.php', 'Formato de email inválido.', 'error');
+        }
+        
+        if (!in_array($role, ['admin', 'usuario'])) {
+            $this->redirect('../vista/admin_main.php', 'Rol inválido.', 'error');
+        }
+        
+        if ($this->adminModel->updateUser($userId, $email, $password, $role)) {
+            $this->redirect('../vista/admin_main.php', 'Usuario actualizado correctamente.');
+        } else {
+            $this->redirect('../vista/admin_main.php', 'Error al actualizar el usuario.', 'error');
+        }
     }
     
     /**
@@ -123,28 +99,20 @@ private function updateUser() {
      */
     private function deleteUser() {
         if (!isset($_POST['user_id']) || !is_numeric($_POST['user_id'])) {
-            $_SESSION['error'] = 'ID de usuario inválido.';
-            header('Location: ../vista/admin_main.php');
-            exit;
+            $this->redirect('../vista/admin_main.php', 'ID de usuario inválido.', 'error');
         }
         
         $userId = (int) $_POST['user_id'];
         
-        // No permitir eliminar al usuario actual
         if ($userId == $_SESSION['user_id']) {
-            $_SESSION['error'] = 'No puede eliminar su propia cuenta.';
-            header('Location: ../vista/admin_main.php');
-            exit;
+            $this->redirect('../vista/admin_main.php', 'No puede eliminar su propia cuenta.', 'error');
         }
         
         if ($this->adminModel->deleteUser($userId)) {
-            $_SESSION['success'] = 'Usuario eliminado correctamente.';
+            $this->redirect('../vista/admin_main.php', 'Usuario eliminado correctamente.');
         } else {
-            $_SESSION['error'] = 'Error al eliminar el usuario.';
+            $this->redirect('../vista/admin_main.php', 'Error al eliminar el usuario.', 'error');
         }
-        
-        header('Location: ../vista/admin_main.php');
-        exit;
     }
     
     /**
@@ -152,28 +120,21 @@ private function updateUser() {
      */
     private function updateUserRole() {
         if (!isset($_POST['user_id']) || !is_numeric($_POST['user_id'])) {
-            $_SESSION['error'] = 'ID de usuario inválido.';
-            header('Location: ../vista/admin_main.php');
-            exit;
+            $this->redirect('../vista/admin_main.php', 'ID de usuario inválido.', 'error');
         }
         
         $userId = (int) $_POST['user_id'];
-        $role = $_POST['role'] ?? null;
+        $role = $_POST['role'] ?? 'usuario';
         
-        if (!in_array($role, ['admin', 'user', null])) {
-            $_SESSION['error'] = 'Rol inválido.';
-            header('Location: ../vista/admin_main.php');
-            exit;
+        if (!in_array($role, ['admin', 'usuario'])) {
+            $this->redirect('../vista/admin_main.php', 'Rol inválido.', 'error');
         }
         
         if ($this->adminModel->updateUserRole($userId, $role)) {
-            $_SESSION['success'] = 'Rol de usuario actualizado correctamente.';
+            $this->redirect('../vista/admin_main.php', 'Rol de usuario actualizado correctamente.');
         } else {
-            $_SESSION['error'] = 'Error al actualizar el rol del usuario.';
+            $this->redirect('../vista/admin_main.php', 'Error al actualizar el rol del usuario.', 'error');
         }
-        
-        header('Location: ../vista/admin_main.php');
-        exit;
     }
     
     /**
@@ -181,15 +142,10 @@ private function updateUser() {
      */
     private function fetchStats() {
         header('Content-Type: application/json');
-        
-        $stats = [
+        echo json_encode([
             'total_users' => $this->adminModel->getTotalUsers(),
-            'today_logins' => $this->adminModel->getTodayLogins(),
-            'failed_attempts' => $this->adminModel->getFailedLoginAttempts(),
-            'blocked_accounts' => $this->adminModel->getBlockedAccounts()
-        ];
-        
-        echo json_encode($stats);
+            'today_logins' => $this->adminModel->getTodayLogins()
+        ]);
         exit;
     }
     
@@ -208,11 +164,9 @@ private function updateUser() {
     }
 }
 
-// Si este archivo se invoca directamente (para acciones AJAX o formularios)
-if (basename($_SERVER['PHP_SELF']) == basename(__FILE__)) {
-    $controller = new AdminController();
-    $controller->processRequest();
-}
+// Crear instancia y procesar la solicitud
+$controller = new AdminController();
+$controller->processRequest();
 
     
 ?>

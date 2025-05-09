@@ -1,6 +1,12 @@
 <?php
+require_once '../control/BaseController.php';
+require_once 'components/Notification.php';
+
 // Iniciar sesión
 session_start();
+
+// Mostrar notificaciones
+BaseController::showNotification();
 
 // Verificar si hay algún mensaje de error, éxito o información
 $errorMsg = $_SESSION['error'] ?? '';
@@ -10,6 +16,7 @@ $infoMsg = $_GET['info'] ?? ($_SESSION['info'] ?? '');
 // Limpiar mensajes de sesión después de mostrarlos
 if(isset($_SESSION['error'])) unset($_SESSION['error']);
 if(isset($_SESSION['success'])) unset($_SESSION['success']);
+if(isset($_SESSION['info'])) unset($_SESSION['info']);
 
 // Recuperar datos del formulario previo en caso de error
 $formData = $_SESSION['form_data'] ?? [];
@@ -17,6 +24,16 @@ if(isset($_SESSION['form_data'])) unset($_SESSION['form_data']);
 
 // Determinar qué formulario mostrar
 $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' : 'login';
+
+// Incluir el modal de propietario si es el primer inicio de sesión
+if (isset($_SESSION['is_first_login'])) {
+    require_once 'components/propietario_modal.php';
+    // No redirigir si es el primer inicio de sesión
+    if (isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] === true) {
+        // Mantener al usuario en la página de login para completar el formulario
+        $activeForm = 'login';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -66,12 +83,19 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
                 
                 <div class="input-group">
                     <span class="input-icon"><img src="../icons/email.avif" alt="Icono de email" width="22" height="22"></span>
-                    <input type="email" name="email" class="input-field" placeholder="Correo Electrónico" value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>" required>
+                    <input type="email" name="email" class="input-field" placeholder="Correo Electrónico" 
+                           value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>" 
+                           minlength="10" maxlength="45" required
+                           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                           title="El correo debe tener entre 10 y 45 caracteres y un formato válido">
                 </div>
                 
                 <div class="input-group">
                     <span class="input-icon"><img src="../icons/password.avif" alt="Icono de contraseña" width="22" height="22"></span>
-                    <input type="password" name="password" class="input-field" placeholder="Contraseña" required>
+                    <input type="password" name="password" class="input-field" placeholder="Contraseña" 
+                           minlength="8" maxlength="25" required
+                           pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
+                           title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
                     <span class="password-toggle" data-state="closed">
                         <img src="../icons/close-eye.avif" alt="Mostrar contraseña" width="20" height="20">
                     </span>
@@ -104,12 +128,19 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
                 
                 <div class="input-group">
                     <span class="input-icon"><img src="../icons/email.avif" alt="Icono de email" width="22" height="22"></span>
-                    <input type="email" name="email" class="input-field" placeholder="Correo Electrónico" value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>" required>
+                    <input type="email" name="email" class="input-field" placeholder="Correo Electrónico" 
+                           value="<?php echo htmlspecialchars($formData['email'] ?? ''); ?>" 
+                           minlength="10" maxlength="45" required
+                           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+                           title="El correo debe tener entre 10 y 45 caracteres y un formato válido">
                 </div>
                 
                 <div class="input-group">
                     <span class="input-icon"><img src="../icons/password.avif" alt="Icono de contraseña" width="22" height="22"></span>
-                    <input type="password" name="password" class="input-field" placeholder="Contraseña" required>
+                    <input type="password" name="password" class="input-field" placeholder="Contraseña" 
+                           minlength="8" maxlength="25" required
+                           pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
+                           title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
                     <span class="password-toggle" data-state="closed">
                         <img src="../icons/close-eye.avif" alt="Mostrar contraseña" width="20" height="20">
                     </span>
@@ -117,7 +148,10 @@ $activeForm = isset($_GET['form']) && $_GET['form'] === 'register' ? 'register' 
                 
                 <div class="input-group">
                     <span class="input-icon"><img src="../icons/password.avif" alt="Icono de contraseña" width="22" height="22"></span>
-                    <input type="password" name="confirm_password" class="input-field" placeholder="Confirmar Contraseña" required>
+                    <input type="password" name="confirm_password" class="input-field" placeholder="Confirmar Contraseña" 
+                           minlength="8" maxlength="25" required
+                           pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
+                           title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
                     <span class="password-toggle" data-state="closed">
                         <img src="../icons/close-eye.avif" alt="Mostrar contraseña" width="20" height="20">
                     </span>

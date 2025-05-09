@@ -1,6 +1,12 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once '../control/BaseController.php';
+require_once 'components/perfil_modal.php';
+BaseController::showNotification();
+
 // Iniciar sesión
-session_start();
 
 // Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
@@ -95,7 +101,10 @@ $userEmail = $_SESSION['user_email'] ?? 'Usuario';
                     <span class="user-name"><?php echo htmlspecialchars($userEmail); ?></span>
                     <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12">
                     <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item">Mi Perfil</a>
+                        <a href="#" onclick="openPerfilModal(); return false;">
+                            <i class="fas fa-user"></i>
+                            <span>Mi Perfil</span>
+                        </a>
                         <a href="#" class="dropdown-item">Configuración</a>
                         <div class="dropdown-divider"></div>
                         <a href="../control/logout_controller.php" class="dropdown-item">Cerrar Sesión</a>

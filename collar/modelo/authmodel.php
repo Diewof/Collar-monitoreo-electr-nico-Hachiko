@@ -142,7 +142,7 @@ public function login($email, $password, $ip_address) {
         }
         
         // Preparar la consulta usando mysqli
-        $stmt = $this->db->prepare("SELECT id, email, password, role FROM users WHERE email = ?");
+        $stmt = $this->db->prepare("SELECT id, email, password, role, last_login FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -150,6 +150,11 @@ public function login($email, $password, $ip_address) {
         
         // Verificar si el usuario existe y la contraseña es correcta
         if ($user && password_verify($password, $user['password'])) {
+            // Verificar si es el primer inicio de sesión
+            if ($user['last_login'] === null) {
+                $_SESSION['is_first_login'] = true;
+            }
+            
             // Actualizar la última vez que inició sesión
             $updateStmt = $this->db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
             $updateStmt->bind_param("i", $user['id']);
@@ -246,8 +251,8 @@ public function login($email, $password, $ip_address) {
             
             // Insertar el nuevo usuario
             $stmt = $this->db->prepare("
-                INSERT INTO users (email, password, created_at) 
-                VALUES (?, ?, NOW())
+                INSERT INTO users (email, password, role, created_at) 
+                VALUES (?, ?, 'usuario', NOW())
             ");
             
             $stmt->bind_param("ss", $email, $hashedPassword);
