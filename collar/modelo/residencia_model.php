@@ -27,5 +27,23 @@ class ResidenciaModel {
             return false;
         }
     }
+
+    public function updateResidencia($residencia_id, $data) {
+        $query = "UPDATE residencia SET direccion = ?, ciudad_id = ? WHERE residencia_id = ?";
+        $stmt = $this->conn->prepare($query);
+        if (!$stmt) {
+            throw new Exception("Error al preparar la consulta de residencia: " . $this->conn->error);
+        }
+        $stmt->bind_param(
+            "sii",
+            $data['direccion'],
+            $data['ciudad_id'],
+            $residencia_id
+        );
+        if (!$stmt->execute()) {
+            throw new Exception("Error al actualizar residencia: " . $stmt->error);
+        }
+        return true;
+    }
 }
 ?> 

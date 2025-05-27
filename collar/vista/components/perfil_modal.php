@@ -75,6 +75,10 @@ if ($userId) {
                         <p><strong>Precio:</strong> $<?php echo number_format($plan['precio'], 2); ?></p>
                     </div>
                 </div>
+
+                <div class="profile-actions">
+                    <button id="editProfileBtn" class="edit-profile-btn">Editar Perfil</button>
+                </div>
             <?php else: ?>
                 <div class="no-profile">
                     <p>No se encontró información del perfil. Por favor, complete sus datos de propietario.</p>
@@ -174,12 +178,33 @@ if ($userId) {
     color: #666;
     font-size: 0.95rem;
 }
+
+.profile-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.edit-profile-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.edit-profile-btn:hover {
+    background-color: #45a049;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('perfilModal');
     const closeBtn = document.getElementById('closePerfilModal');
+    const editProfileBtn = document.getElementById('editProfileBtn');
     
     // Función para abrir el modal
     window.openPerfilModal = function() {
@@ -199,6 +224,12 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
         }
+    }
+
+    // Manejar clic en el botón de editar perfil
+    editProfileBtn.onclick = function() {
+        // Redirigir a la página de edición de perfil
+        window.location.href = 'editar_perfil.php';
     }
 });
 </script> 

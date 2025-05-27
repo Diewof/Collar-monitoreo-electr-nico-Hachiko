@@ -4,9 +4,9 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 require_once '../control/BaseController.php';
 require_once 'components/perfil_modal.php';
+require_once 'components/mascota_modal.php';
+require_once 'components/perfil_mascota_modal.php';
 BaseController::showNotification();
-
-// Iniciar sesión
 
 // Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
@@ -15,14 +15,47 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     exit;
 }
 
+// Obtener información del usuario
+$userEmail = $_SESSION['user_email'] ?? 'Usuario';
+
 // Verificar si el usuario es administrador, en ese caso redirigir al panel admin
 if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
     header('Location: admin_main.php');
     exit;
 }
 
-// Obtener información del usuario
-$userEmail = $_SESSION['user_email'] ?? 'Usuario';
+// Obtener propietario_id de la sesión o de la base de datos si no está en sesión
+$propietarioId = $_SESSION['propietario_id'] ?? null;
+$tieneMascotas = false;
+
+if ($propietarioId) {
+    require_once '../modelo/mascota_model.php';
+    $mascotaModel = new MascotaModel();
+    $tieneMascotas = $mascotaModel->tieneMascotas($propietarioId);
+} else {
+    // Si no hay propietario_id en la sesión, intentar obtenerlo de la base de datos
+    // Esto puede ocurrir si el usuario completó el perfil en una sesión anterior
+    // o si hubo un problema al guardarlo en la sesión inicialmente.
+    // Si no se encuentra, asumimos que debe completar el perfil de propietario primero.
+    require_once '../modelo/propietario_model.php';
+    $propietarioModel = new PropietarioModel();
+    $propietario = $propietarioModel->getPropietarioByUserId($_SESSION['user_id']);
+    if ($propietario) {
+        $_SESSION['propietario_id'] = $propietario['propietario_id'];
+        $propietarioId = $propietario['propietario_id'];
+        // Ahora que tenemos propietario_id, verificar si tiene mascotas
+        require_once '../modelo/mascota_model.php';
+        $mascotaModel = new MascotaModel();
+        $tieneMascotas = $mascotaModel->tieneMascotas($propietarioId);
+    } else {
+        // Si el propietario no se encuentra en la base de datos, 
+        // redirigir para completar el perfil si es el primer login
+        // La lógica para redirigir al modal de propietario en el primer login 
+        // ya está en login-registro.php, así que aquí solo nos aseguramos
+        // de que no se muestre el modal de mascota si falta el propietario_id.
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -68,7 +101,7 @@ $userEmail = $_SESSION['user_email'] ?? 'Usuario';
                 <div class="dropdown-menu">
                     <a href="#" class="dropdown-item">Nueva mascota</a>
                     <a href="#" class="dropdown-item">Estado emocional</a>
-                    <a href="#" class="dropdown-item">Perfil de mascota</a>
+                    <a href="#" onclick="openPerfilMascotaModal(); return false;" class="dropdown-item">Perfil de mascota</a>
                 </div>
             </li>
             <li class="nav-item dropdown">
@@ -287,6 +320,29 @@ $userEmail = $_SESSION['user_email'] ?? 'Usuario';
     
     <!-- Scripts -->
     <script src="../js/main.js"></script>
-    <script src="../js/search.js"></script> 
+    <script src="../js/search.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mostrar el modal de mascota si el usuario tiene propietario_id y no tiene mascotas registradas
+        <?php if ($propietarioId && !$tieneMascotas): ?>
+        const mascotaModal = document.getElementById('mascotaModal');
+        if (mascotaModal) {
+            mascotaModal.style.display = 'block';
+            // Prevenir que el modal se cierre
+            mascotaModal.querySelector('.close')?.remove();
+            // Prevenir que se cierre al hacer clic fuera del modal
+            mascotaModal.addEventListener('click', function(e) {
+                if (e.target === mascotaModal) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Disparar el evento show para cargar las razas
+            const showEvent = new Event('show');
+            mascotaModal.dispatchEvent(showEvent);
+        }
+        <?php endif; ?>
+    });
+    </script>
 </body>
 </html>

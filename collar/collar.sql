@@ -58,7 +58,7 @@ CREATE TABLE `collar` (
   `bateria` tinyint DEFAULT NULL,
   PRIMARY KEY (`collar_id`),
   KEY `perro_id` (`perro_id`),
-  CONSTRAINT `collar_ibfk_1` FOREIGN KEY (`perro_id`) REFERENCES `perro` (`perro_id`)
+  CONSTRAINT `collar_ibfk_1` FOREIGN KEY (`perro_id`) REFERENCES `perro` (`perro_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -188,7 +188,7 @@ CREATE TABLE `notificacion` (
   PRIMARY KEY (`notificacion_id`),
   KEY `propietario_id` (`propietario_id`),
   KEY `tipo_notificacion_id` (`tipo_notificacion_id`),
-  CONSTRAINT `notificacion_ibfk_1` FOREIGN KEY (`propietario_id`) REFERENCES `propietario` (`propietario_id`),
+  CONSTRAINT `notificacion_ibfk_1` FOREIGN KEY (`propietario_id`) REFERENCES `propietario` (`propietario_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `notificacion_ibfk_2` FOREIGN KEY (`tipo_notificacion_id`) REFERENCES `tipo_notificacion` (`tipo_notificacion_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -273,7 +273,7 @@ CREATE TABLE `perro` (
   PRIMARY KEY (`perro_id`),
   KEY `propietario_id` (`propietario_id`),
   KEY `raza_id` (`raza_id`),
-  CONSTRAINT `perro_ibfk_1` FOREIGN KEY (`propietario_id`) REFERENCES `propietario` (`propietario_id`),
+  CONSTRAINT `perro_ibfk_1` FOREIGN KEY (`propietario_id`) REFERENCES `propietario` (`propietario_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `perro_ibfk_2` FOREIGN KEY (`raza_id`) REFERENCES `raza` (`raza_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -322,23 +322,23 @@ DROP TABLE IF EXISTS `propietario`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `propietario` (
   `propietario_id` mediumint NOT NULL AUTO_INCREMENT,
-  `primer_nombre` varchar(50) NOT NULL,
-  `segundo_nombre` varchar(50),
-  `apellido` varchar(50) NOT NULL,
-  `segundo_apellido` varchar(50),
-  `contraseña` char(60) DEFAULT NULL,
-  `telefono` varchar(15) NOT NULL,
-  `email` varchar(100),
-  `residencia_id` int NOT NULL,
-  `plan_id` tinyint DEFAULT NULL,
   `user_id` int NOT NULL,
+  `primer_nombre` varchar(50) DEFAULT NULL,
+  `segundo_nombre` varchar(50) DEFAULT NULL,
+  `apellido` varchar(50) DEFAULT NULL,
+  `segundo_apellido` varchar(50) DEFAULT NULL,
+  `telefono` varchar(15) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `residencia_id` int DEFAULT NULL,
+  `plan_id` tinyint DEFAULT NULL,
   PRIMARY KEY (`propietario_id`),
   KEY `residencia_id` (`residencia_id`),
   KEY `plan_id` (`plan_id`),
+  KEY `user_id` (`user_id`),
   CONSTRAINT `propietario_ibfk_1` FOREIGN KEY (`residencia_id`) REFERENCES `residencia` (`residencia_id`),
   CONSTRAINT `propietario_ibfk_2` FOREIGN KEY (`plan_id`) REFERENCES `plan` (`plan_id`),
-  CONSTRAINT `propietario_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `propietario_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -347,7 +347,7 @@ CREATE TABLE `propietario` (
 
 LOCK TABLES `propietario` WRITE;
 /*!40000 ALTER TABLE `propietario` DISABLE KEYS */;
-INSERT INTO `propietario` VALUES (2,'Juan','Diego','Gutierrez','Otalvaro',NULL,'3023417958','dsd@gmail.com',2,2,9);
+INSERT INTO `propietario` VALUES (1,10,'Juan','Diego','Gutierrez','Otalvaro','3023417958','dsd@gmail.com',2,2);
 /*!40000 ALTER TABLE `propietario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -394,7 +394,7 @@ CREATE TABLE `registro_comportamiento` (
   KEY `collar_id` (`collar_id`),
   KEY `emocion_id` (`emocion_id`),
   KEY `tipo_patron_id` (`tipo_patron_id`),
-  CONSTRAINT `registro_comportamiento_ibfk_1` FOREIGN KEY (`collar_id`) REFERENCES `collar` (`collar_id`),
+  CONSTRAINT `registro_comportamiento_ibfk_1` FOREIGN KEY (`collar_id`) REFERENCES `collar` (`collar_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `registro_comportamiento_ibfk_2` FOREIGN KEY (`emocion_id`) REFERENCES `emocion` (`emocion_id`),
   CONSTRAINT `registro_comportamiento_ibfk_3` FOREIGN KEY (`tipo_patron_id`) REFERENCES `tipo_patron` (`tipo_patron_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -427,7 +427,7 @@ CREATE TABLE `registro_sensores` (
   `marca_tiempo` datetime DEFAULT NULL,
   PRIMARY KEY (`registro_id`),
   KEY `collar_id` (`collar_id`),
-  CONSTRAINT `registro_sensores_ibfk_1` FOREIGN KEY (`collar_id`) REFERENCES `collar` (`collar_id`)
+  CONSTRAINT `registro_sensores_ibfk_1` FOREIGN KEY (`collar_id`) REFERENCES `collar` (`collar_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -463,7 +463,7 @@ CREATE TABLE `residencia` (
 
 LOCK TABLES `residencia` WRITE;
 /*!40000 ALTER TABLE `residencia` DISABLE KEYS */;
-INSERT INTO `residencia` VALUES (1,3,'Carrera 59 #67-40'),(2,3,'Carrera 59 #67-40');
+INSERT INTO `residencia` VALUES (2,5,'Carrera 59 #67-40');
 /*!40000 ALTER TABLE `residencia` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -558,7 +558,7 @@ CREATE TABLE `users` (
   `role` varchar(8) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -567,9 +567,17 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (4,'jdgutierrezotalvaro04@gmail.com','$2y$10$phOaZlo7a8hZUCFe7AIHcO2WOazU4yQgy.d28LQDCw0c6FFIKNa9W','2025-04-17 21:02:10','2025-05-05 10:56:03','admin'),(9,'dsd@gmail.com','$2y$10$Nl7.PQrDc3YeGzvYSrRUA./cEwi8bqmn8SYaUHB/p7m8q6NsQNrJm','2025-05-05 10:14:55','2025-05-05 11:00:04','usuario');
+INSERT INTO `users` VALUES (10,'dsd@gmail.com','$2y$10$.ND73t4BFMU5axn5RfeuaOcow2g/EX9xqSzdZjxDJeXrEUqkcLF.u','2025-05-11 18:12:22','2025-05-11 18:16:49','admin');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'collar'
+--
+
+--
+-- Dumping routines for database 'collar'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -580,4 +588,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-05-05 11:01:11
+-- Dump completed on 2025-05-11 18:20:43

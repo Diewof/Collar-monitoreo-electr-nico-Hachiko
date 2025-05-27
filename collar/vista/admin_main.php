@@ -88,37 +88,64 @@ BaseController::showNotification();
                 <span>¡Hachiko Admin!</span>
             </div>
             
-            <div class="search-container">
-                <div class="search-box">
-                    <img src="../icons/search.avif" alt="Buscar" class="search-icon" width="18" height="18">
-                    <input type="text" placeholder="Buscar usuarios..." class="search-input">
-                </div>
-                <div id="search-results" class="search-results"></div>
-            </div>
+            <!-- TODO: Aquí se añadirán nuevas secciones del navbar cuando se necesiten -->
             
             <ul class="nav-menu">
                 <li class="nav-item dropdown">
-                    <a href="#" class="nav-link">Gestión de Usuarios <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
+                    <a href="#" class="nav-link">Dashboard <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
                     <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item" data-section="users">Listar Usuarios</a>
+                        <a href="#" class="dropdown-item" data-section="dashboard">Vista General</a>
+                        <a href="#" class="dropdown-item" data-section="analytics">Analíticas</a>
+                        <a href="#" class="dropdown-item" data-section="reports">Reportes</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link">Usuarios <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item" data-section="users">Lista de Usuarios</a>
                         <a href="#" class="dropdown-item" data-section="add_user">Añadir Usuario</a>
-                        <a href="#" class="dropdown-item" data-section="user_stats">Estadísticas</a>
+                        <a href="#" class="dropdown-item" data-section="user_roles">Roles y Permisos</a>
+                        <a href="#" class="dropdown-item" data-section="login_attempts">Intentos de Acceso</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link">Mascota <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item" data-section="mascotas">Mascotas</a>
+                        <a href="#" class="dropdown-item" data-section="historial_emociones">Historial de emociones</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link">Collar <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item" data-section="collares">Collares</a>
+                        <a href="#" class="dropdown-item" data-section="registro_sensores">Registro de sensores</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link">Configuración <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item" data-section="system_settings">Configuración General</a>
+                        <a href="#" class="dropdown-item" data-section="email_settings">Configuración de Email</a>
+                        <a href="#" class="dropdown-item" data-section="notification_settings">Notificaciones</a>
+                        <a href="#" class="dropdown-item" data-section="backup_settings">Backups</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
                     <a href="#" class="nav-link">Seguridad <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
                     <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item" data-section="login_attempts">Registros de Intentos</a>
-                        <a href="#" class="dropdown-item" data-section="blocks">Bloqueos</a>
-                        <a href="#" class="dropdown-item" data-section="security_settings">Configuración</a>
+                        <a href="#" class="dropdown-item" data-section="security_logs">Logs de Seguridad</a>
+                        <a href="#" class="dropdown-item" data-section="ip_whitelist">Lista Blanca IP</a>
+                        <a href="#" class="dropdown-item" data-section="two_factor">Autenticación 2FA</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown">
-                    <a href="#" class="nav-link">Sistema <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
+                    <a href="#" class="nav-link">Mantenimiento <img src="../icons/arrow-down.avif" alt="Expandir" width="12" height="12"></a>
                     <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item" data-section="system_settings">Configuración</a>
-                        <a href="#" class="dropdown-item" data-section="backups">Backups</a>
-                        <a href="#" class="dropdown-item" data-section="logs">Logs</a>
+                        <a href="#" class="dropdown-item" data-section="system_logs">Logs del Sistema</a>
+                        <a href="#" class="dropdown-item" data-section="cache">Gestión de Caché</a>
+                        <a href="#" class="dropdown-item" data-section="optimization">Optimización</a>
+                        <a href="#" class="dropdown-item" data-section="updates">Actualizaciones</a>
                     </div>
                 </li>
             </ul>
@@ -177,8 +204,13 @@ BaseController::showNotification();
     <main class="admin-main-content">
         <?php if ($section === 'dashboard' || $section === ''): ?>
         <div class="admin-header">
-            <h1>Panel de Administración</h1>
-            <p>Bienvenido al panel de control administrativo de Hachiko</p>
+            <div class="header-content">
+                <h1>Panel de Administración</h1>
+                <div class="header-actions">
+                    <!-- Eliminando el checkbox redundante -->
+                </div>
+            </div>
+            <p>Gestiona usuarios, planes y configuración del sistema</p>
         </div>
         
         <!-- Resumen de estadísticas -->
@@ -234,8 +266,10 @@ BaseController::showNotification();
                             <th>ID</th>
                             <th>Email</th>
                             <th>Rol</th>
-                            <th>Fecha de Registro</th>
-                            <th>Último Acceso</th>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Dirección</th>
+                            <th>Plan</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -250,8 +284,44 @@ BaseController::showNotification();
                                     <option value="usuario" <?php echo ($user['role'] === null || $user['role'] === 'usuario') ? 'selected' : ''; ?>>usuario</option>
                                 </select>
                             </td>
-                            <td><?php echo date('d/m/Y', strtotime($user['created_at'])); ?></td>
-                            <td><?php echo ($user['last_login']) ? date('d/m/Y H:i', strtotime($user['last_login'])) : 'Nunca'; ?></td>
+                            <td>
+                                <?php 
+                                if (isset($user['propietario'])) {
+                                    echo htmlspecialchars(
+                                        trim(
+                                            ($user['propietario']['primer_nombre'] ?? '') . ' ' .
+                                            ($user['propietario']['segundo_nombre'] ?? '') . ' ' .
+                                            ($user['propietario']['apellido'] ?? '') . ' ' .
+                                            ($user['propietario']['segundo_apellido'] ?? '')
+                                        )
+                                    );
+                                } else {
+                                    echo 'No registrado';
+                                }
+                                ?>
+                            </td>
+                            <td><?php echo isset($user['propietario']) ? htmlspecialchars($user['propietario']['telefono'] ?? 'No registrado') : 'No registrado'; ?></td>
+                            <td>
+                                <?php 
+                                if (isset($user['propietario']) && isset($user['propietario']['direccion'])) {
+                                    echo htmlspecialchars(
+                                        ($user['propietario']['direccion']['direccion'] ?? '') . ', ' .
+                                        ($user['propietario']['direccion']['ciudad'] ?? '')
+                                    );
+                                } else {
+                                    echo 'No registrada';
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <?php 
+                                if (isset($user['propietario']) && isset($user['propietario']['plan'])) {
+                                    echo htmlspecialchars($user['propietario']['plan']['nombre_plan'] ?? 'No asignado');
+                                } else {
+                                    echo 'No asignado';
+                                }
+                                ?>
+                            </td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="btn btn-sm btn-edit" data-user-id="<?php echo $user['id']; ?>">Editar</button>
@@ -328,8 +398,10 @@ BaseController::showNotification();
                             <th>ID</th>
                             <th>Email</th>
                             <th>Rol</th>
-                            <th>Fecha de Registro</th>
-                            <th>Último Acceso</th>
+                            <th>Nombre Completo</th>
+                            <th>Teléfono</th>
+                            <th>Dirección</th>
+                            <th>Plan</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -344,8 +416,44 @@ BaseController::showNotification();
                                     <option value="usuario" <?php echo ($user['role'] === null || $user['role'] === 'usuario') ? 'selected' : ''; ?>>usuario</option>
                                 </select>
                             </td>
-                            <td><?php echo date('d/m/Y', strtotime($user['created_at'])); ?></td>
-                            <td><?php echo ($user['last_login']) ? date('d/m/Y H:i', strtotime($user['last_login'])) : 'Nunca'; ?></td>
+                            <td>
+                                <?php 
+                                if (isset($user['propietario'])) {
+                                    echo htmlspecialchars(
+                                        trim(
+                                            ($user['propietario']['primer_nombre'] ?? '') . ' ' .
+                                            ($user['propietario']['segundo_nombre'] ?? '') . ' ' .
+                                            ($user['propietario']['apellido'] ?? '') . ' ' .
+                                            ($user['propietario']['segundo_apellido'] ?? '')
+                                        )
+                                    );
+                                } else {
+                                    echo 'No registrado';
+                                }
+                                ?>
+                            </td>
+                            <td><?php echo isset($user['propietario']) ? htmlspecialchars($user['propietario']['telefono'] ?? 'No registrado') : 'No registrado'; ?></td>
+                            <td>
+                                <?php 
+                                if (isset($user['propietario']) && isset($user['propietario']['direccion'])) {
+                                    echo htmlspecialchars(
+                                        ($user['propietario']['direccion']['direccion'] ?? '') . ', ' .
+                                        ($user['propietario']['direccion']['ciudad'] ?? '')
+                                    );
+                                } else {
+                                    echo 'No registrada';
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <?php 
+                                if (isset($user['propietario']) && isset($user['propietario']['plan'])) {
+                                    echo htmlspecialchars($user['propietario']['plan']['nombre_plan'] ?? 'No asignado');
+                                } else {
+                                    echo 'No asignado';
+                                }
+                                ?>
+                            </td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="btn btn-sm btn-edit" data-user-id="<?php echo $user['id']; ?>">Editar</button>
@@ -371,47 +479,66 @@ BaseController::showNotification();
         
         <div class="admin-section">
             <div class="form-container">
-                <form action="../control/auth_controller.php" method="POST" class="admin-form">
+                <form action="../control/admin_controller.php" method="POST" class="admin-form" id="add-user-form">
                     <input type="hidden" name="action" value="register_user">
-                    <input type="hidden" name="from_admin" value="1">
                     
                     <div class="form-group">
-                        <label for="email">Correo Electrónico:</label>
+                        <label for="email">Correo Electrónico *</label>
                         <input type="email" id="email" name="email" class="form-control" 
                                minlength="10" maxlength="45" required
                                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-                               title="El correo debe tener entre 10 y 45 caracteres y un formato válido">
+                               title="El correo debe tener entre 10 y 45 caracteres y un formato válido"
+                               placeholder="ejemplo@correo.com">
+                        <div class="error-message" id="email_error">
+                            <span class="error-icon">✕</span>
+                            <span class="error-text">El correo debe tener entre 10 y 45 caracteres y un formato válido</span>
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="password">Contraseña:</label>
+                        <label for="password">Contraseña *</label>
                         <input type="password" id="password" name="password" class="form-control" 
                                minlength="8" maxlength="25" required
                                pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
-                               title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
+                               title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número"
+                               placeholder="Mínimo 8 caracteres">
+                        <div class="error-message" id="password_error">
+                            <span class="error-icon">✕</span>
+                            <span class="error-text">La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número</span>
+                        </div>
                         <div class="password-strength-meter">
                             <div class="strength-bar"></div>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="confirm_password">Confirmar Contraseña:</label>
+                        <label for="confirm_password">Confirmar Contraseña *</label>
                         <input type="password" id="confirm_password" name="confirm_password" class="form-control" 
                                minlength="8" maxlength="25" required
                                pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
-                               title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
+                               title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número"
+                               placeholder="Repita la contraseña">
+                        <div class="error-message" id="confirm_password_error">
+                            <span class="error-icon">✕</span>
+                            <span class="error-text">Las contraseñas deben coincidir</span>
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="role">Rol:</label>
-                        <select id="role" name="role" class="form-control">
+                        <label for="role">Rol *</label>
+                        <select id="role" name="role" class="form-control" required>
+                            <option value="">Seleccione un rol</option>
                             <option value="usuario">Usuario</option>
                             <option value="admin">Administrador</option>
                         </select>
+                        <div class="error-message" id="role_error">
+                            <span class="error-icon">✕</span>
+                            <span class="error-text">Debe seleccionar un rol</span>
+                        </div>
                     </div>
                     
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary">Crear Usuario</button>
+                        <button type="submit" class="btn btn-primary" id="create-user-btn" disabled>Crear Usuario</button>
                         <button type="button" class="btn btn-secondary" onclick="window.location.href='admin_main.php'">Cancelar</button>
                     </div>
                 </form>
@@ -520,115 +647,182 @@ BaseController::showNotification();
     <!-- Scripts -->
     <script src="../js/main.js"></script>
     <script src="../js/admin.js"></script>
-<!-- Modal para editar usuario - Añadir antes del cierre del body -->
-<div id="edit-user-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Editar Usuario</h3>
-            <span class="close-modal">&times;</span>
-        </div>
-        <div id="edit-confirmation" class="confirmation-message">
-            Usuario actualizado correctamente
-        </div>
-        <form id="edit-user-form" action="../control/admin_controller.php" method="POST" class="admin-form">
-            <input type="hidden" name="action" value="update_user">
-            <input type="hidden" id="edit-user-id" name="user_id" value="">
-
-            <div class="form-group">
-                <label for="edit-email">Correo Electrónico:</label>
-                <input type="email" id="edit-email" name="email" class="form-control" 
-                       minlength="10" maxlength="45" required
-                       pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-                       title="El correo debe tener entre 10 y 45 caracteres y un formato válido">
-            </div>
-
-            <div class="form-group">
-                <label for="edit-password">Nueva Contraseña (dejar en blanco para mantener la actual):</label>
-                <input type="password" id="edit-password" name="password" class="form-control"
-                       minlength="8" maxlength="25"
-                       pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
-                       title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
-                <div class="password-strength-meter">
-                    <div class="strength-bar"></div>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="edit-confirm-password">Confirmar Nueva Contraseña:</label>
-                <input type="password" id="edit-confirm-password" name="confirm_password" class="form-control"
-                       minlength="8" maxlength="25"
-                       pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,25}$"
-                       title="La contraseña debe tener entre 8 y 25 caracteres, incluyendo al menos una letra y un número">
-            </div>
-
-            <div class="form-group">
-                <label for="edit-role">Rol:</label>
-                <select id="edit-role" name="role" class="form-control">
-                    <option value="usuario">Usuario</option>
-                    <option value="admin">Administrador</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary btn-modal">Guardar Cambios</button>
-                <button type="button" class="btn btn-secondary btn-modal close-modal">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
+<?php include 'components/edit_user_modal.php'; ?>
 <style>
-    .btn-modal {
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
+    /* --- Tema claro/oscuro para el formulario y campos --- */
+    body.dark-theme .admin-form {
+        background-color: #18191a;
+        color: #f1f1f1;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    }
+    body.dark-theme .form-control {
+        background-color: #23272f;
+        color: #f1f1f1;
+        border-color: #333;
+    }
+    body.dark-theme .form-control:focus {
+        border-color: #4f8cff;
+        box-shadow: 0 0 5px rgba(79, 140, 255, 0.3);
+    }
+    body.dark-theme .form-control.error {
+        background-color: rgba(231, 76, 60, 0.08);
+    }
+    body.dark-theme .form-control.valid {
+        background-color: rgba(46, 204, 113, 0.08);
+    }
+    body.dark-theme .error-message {
+        background-color: rgba(231, 76, 60, 0.13);
+        color: #ffb3b3;
+    }
+    body.dark-theme .btn-primary {
+        background-color: #4f8cff;
+        color: #fff;
+    }
+    body.dark-theme .btn-primary:hover:not(:disabled) {
+        background-color: #2563eb;
+    }
+    body.dark-theme .btn-secondary {
+        background-color: #333;
+        color: #fff;
+    }
+    body.dark-theme .btn-secondary:hover {
+        background-color: #555;
+    }
+
+    body.light-theme .admin-form {
+        background-color: #fff;
+        color: #222;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    body.light-theme .form-control {
+        background-color: #fff;
+        color: #222;
+        border-color: #ddd;
+    }
+    body.light-theme .form-control:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+    }
+    body.light-theme .form-control.error {
+        background-color: rgba(231, 76, 60, 0.05);
+    }
+    body.light-theme .form-control.valid {
+        background-color: rgba(46, 204, 113, 0.05);
+    }
+    body.light-theme .error-message {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+    }
+    body.light-theme .btn-primary {
+        background-color: #3498db;
+        color: #fff;
+    }
+    body.light-theme .btn-primary:hover:not(:disabled) {
+        background-color: #2980b9;
+    }
+    body.light-theme .btn-secondary {
+        background-color: #95a5a6;
+        color: #fff;
+    }
+    body.light-theme .btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+
+    /* --- Resto de estilos del formulario (ya existentes) --- */
+    .admin-form {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
         font-weight: 500;
-        cursor: pointer;
+    }
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
         transition: all 0.3s ease;
-        border: none;
-        margin: 0 5px;
     }
-
-    .btn-primary.btn-modal {
-        background-color: #4CAF50;
-        color: white;
+    .form-control:focus {
+        outline: none;
     }
-
-    .btn-primary.btn-modal:hover {
-        background-color: #45a049;
-        transform: translateY(-2px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    .form-control.error {
+        border-color: #e74c3c;
     }
-
-    .btn-secondary.btn-modal {
-        background-color: #f44336;
-        color: white;
+    .form-control.valid {
+        border-color: #2ecc71;
     }
-
-    .btn-secondary.btn-modal:hover {
-        background-color: #da190b;
-        transform: translateY(-2px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    .error-message {
+        display: none;
+        font-size: 12px;
+        margin-top: 5px;
+        padding: 8px;
+        border-radius: 4px;
+        align-items: center;
     }
-
+    .error-message.show {
+        display: flex;
+    }
+    .error-icon {
+        margin-right: 8px;
+        font-weight: bold;
+    }
     .btn-primary {
-        background-color: #2196F3;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        font-family: 'Poppins', sans-serif;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
         transition: all 0.3s ease;
-        border: none;
     }
-
-    .btn-primary:hover {
-        background-color: #1976D2;
-        transform: translateY(-2px);
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    .btn-primary:disabled {
+        background-color: #95a5a6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    .btn-secondary {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-left: 10px;
     }
 </style>
+<script>
+// --- JS para alternar tema claro/oscuro ---
+function setTheme(theme) {
+    document.body.classList.remove('dark-theme', 'light-theme');
+    document.body.classList.add(theme + '-theme');
+    localStorage.setItem('theme', theme);
+}
+
+function initTheme() {
+    let theme = localStorage.getItem('theme');
+    if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    setTheme(theme);
+}
+
+document.getElementById('theme-toggle').addEventListener('click', function() {
+    const current = document.body.classList.contains('dark-theme') ? 'dark' : 'light';
+    setTheme(current === 'dark' ? 'light' : 'dark');
+});
+
+initTheme();
+</script>
 </body>
 </html>

@@ -77,6 +77,14 @@ class PropietarioModel {
         try {
             error_log("Datos recibidos en savePropietario: " . print_r($data, true));
             
+            // Validar campos requeridos
+            $requiredFields = ['primer_nombre', 'apellido', 'telefono', 'direccion', 'ciudad_id', 'plan_id'];
+            foreach ($requiredFields as $field) {
+                if (empty($data[$field])) {
+                    throw new Exception("El campo $field es requerido");
+                }
+            }
+            
             // Iniciar transacción
             $this->conn->begin_transaction();
             
@@ -104,8 +112,8 @@ class PropietarioModel {
             // 2. Insertar el propietario
             $propietarioQuery = "INSERT INTO propietario (
                 primer_nombre, segundo_nombre, apellido, segundo_apellido,
-                telefono, email, residencia_id, plan_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                telefono, email, residencia_id, plan_id, user_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
             $stmt = $this->conn->prepare($propietarioQuery);
             if (!$stmt) {
@@ -120,11 +128,12 @@ class PropietarioModel {
                 'telefono' => $data['telefono'],
                 'email' => $data['email'],
                 'residencia_id' => $residencia_id,
-                'plan_id' => $data['plan_id']
+                'plan_id' => $data['plan_id'],
+                'user_id' => $data['user_id']
             ], true));
             
             $stmt->bind_param(
-                "ssssssii",
+                "ssssssiii",
                 $data['primer_nombre'],
                 $data['segundo_nombre'],
                 $data['apellido'],
@@ -132,7 +141,8 @@ class PropietarioModel {
                 $data['telefono'],
                 $data['email'],
                 $residencia_id,
-                $data['plan_id']
+                $data['plan_id'],
+                $data['user_id']
             );
             
             if (!$stmt->execute()) {
@@ -149,14 +159,14 @@ class PropietarioModel {
             // Confirmar transacción
             $this->conn->commit();
             error_log("Transacción completada exitosamente");
-            return true;
+            return $propietario_id;
             
         } catch (Exception $e) {
             // Revertir transacción en caso de error
             $this->conn->rollback();
             error_log("Error en savePropietario: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
-            return false;
+            throw $e; // Relanzar la excepción para manejarla en el controlador
         }
     }
 
@@ -172,6 +182,104 @@ class PropietarioModel {
             error_log("Error al obtener propietario por user_id: " . $e->getMessage());
             return false;
         }
+    }
+
+    public function updatePropietario($data) {
+        try {
+            $this->conn->begin_transaction();
+
+            // 1. Obtener el ID de la residencia actual
+            $query = "SELECT residencia_id FROM propietario WHERE propietario_id = ?";
+            $stmt = $this->conn->prepare($query);
+            if (!$stmt) {
+                throw new Exception("Error al preparar la consulta: " . $this->conn->error);
+            }
+            $stmt->bind_param("i", $data['propietario_id']);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $propietario = $result->fetch_assoc();
+            
+            if (!$propietario) {
+                throw new Exception("No se encontró el propietario");
+            }
+            
+            $residencia_id = $propietario['residencia_id'];
+
+            // 2. Actualizar la residencia
+            $residenciaQuery = "UPDATE residencia SET 
+                direccion = ?,
+                ciudad_id = ?
+                WHERE residencia_id = ?";
+            
+            $stmt = $this->conn->prepare($residenciaQuery);
+            if (!$stmt) {
+                throw new Exception("Error al preparar la consulta de residencia: " . $this->conn->error);
+            }
+
+            $stmt->bind_param(
+                "sii",
+                $data['direccion'],
+                $data['ciudad_id'],
+                $residencia_id
+            );
+
+            if (!$stmt->execute()) {
+                throw new Exception("Error al actualizar residencia: " . $stmt->error);
+            }
+
+            // 3. Actualizar datos del propietario
+            $propietarioQuery = "UPDATE propietario SET 
+                primer_nombre = ?,
+                segundo_nombre = ?,
+                apellido = ?,
+                segundo_apellido = ?,
+                telefono = ?,
+                plan_id = ?
+                WHERE propietario_id = ?";
+            
+            $stmt = $this->conn->prepare($propietarioQuery);
+            if (!$stmt) {
+                throw new Exception("Error al preparar la consulta de propietario: " . $this->conn->error);
+            }
+
+            $stmt->bind_param(
+                "sssssii",
+                $data['primer_nombre'],
+                $data['segundo_nombre'],
+                $data['apellido'],
+                $data['segundo_apellido'],
+                $data['telefono'],
+                $data['plan_id'],
+                $data['propietario_id']
+            );
+
+            if (!$stmt->execute()) {
+                throw new Exception("Error al actualizar propietario: " . $stmt->error);
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollback();
+            error_log("Error en updatePropietario: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function getJerarquiaUbicacion($ciudad_id) {
+        $query = "SELECT 
+                    c.ciudad_id, c.nombre AS ciudad,
+                    d.departamento_id, d.nombre AS departamento,
+                    p.pais_id, p.nombre AS pais
+                  FROM ciudad c
+                  JOIN departamento d ON c.departamento_id = d.departamento_id
+                  JOIN pais p ON d.pais_id = p.pais_id
+                  WHERE c.ciudad_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("i", $ciudad_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
     }
 }
 ?> 

@@ -19,32 +19,74 @@ $planes = $propietarioModel->getPlanes();
             
             <div class="form-group">
                 <label for="primer_nombre">Primer Nombre *</label>
-                <input type="text" id="primer_nombre" name="primer_nombre" class="form-control" required>
+                <input type="text" id="primer_nombre" name="primer_nombre" class="form-control" required
+                       maxlength="45"
+                       pattern="^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{2,45}$"
+                       title="El primer nombre debe tener entre 2 y 45 caracteres y solo puede contener letras">
+                <div class="error-message" id="primer_nombre_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">El primer nombre debe tener entre 2 y 45 caracteres y solo puede contener letras</span>
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="segundo_nombre">Segundo Nombre</label>
-                <input type="text" id="segundo_nombre" name="segundo_nombre" class="form-control">
+                <input type="text" id="segundo_nombre" name="segundo_nombre" class="form-control"
+                       maxlength="45"
+                       pattern="^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{2,45}$"
+                       title="El segundo nombre debe tener entre 2 y 45 caracteres y solo puede contener letras">
+                <div class="error-message" id="segundo_nombre_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">El segundo nombre debe tener entre 2 y 45 caracteres y solo puede contener letras</span>
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="apellido">Primer Apellido *</label>
-                <input type="text" id="apellido" name="apellido" class="form-control" required>
+                <input type="text" id="apellido" name="apellido" class="form-control" required
+                       maxlength="45"
+                       pattern="^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{2,45}$"
+                       title="El apellido debe tener entre 2 y 45 caracteres y solo puede contener letras">
+                <div class="error-message" id="apellido_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">El apellido debe tener entre 2 y 45 caracteres y solo puede contener letras</span>
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="segundo_apellido">Segundo Apellido</label>
-                <input type="text" id="segundo_apellido" name="segundo_apellido" class="form-control">
+                <input type="text" id="segundo_apellido" name="segundo_apellido" class="form-control"
+                       maxlength="45"
+                       pattern="^[A-Za-zÁáÉéÍíÓóÚúÑñ\s]{2,45}$"
+                       title="El segundo apellido debe tener entre 2 y 45 caracteres y solo puede contener letras">
+                <div class="error-message" id="segundo_apellido_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">El segundo apellido debe tener entre 2 y 45 caracteres y solo puede contener letras</span>
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="telefono">Teléfono *</label>
-                <input type="tel" id="telefono" name="telefono" class="form-control" required>
+                <input type="tel" id="telefono" name="telefono" class="form-control" required
+                       maxlength="15"
+                       pattern="^[0-9]{7,15}$"
+                       title="El teléfono debe tener entre 7 y 15 caracteres y solo puede contener números">
+                <div class="error-message" id="telefono_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">El teléfono debe tener entre 7 y 15 caracteres y solo puede contener números</span>
+                </div>
             </div>
             
             <div class="form-group">
                 <label for="direccion">Dirección *</label>
-                <input type="text" id="direccion" name="direccion" class="form-control" required>
+                <input type="text" id="direccion" name="direccion" class="form-control" required
+                       maxlength="100"
+                       pattern="^[A-Za-z0-9ÁáÉéÍíÓóÚúÑñ\s.,#-]{5,100}$"
+                       title="La dirección debe tener entre 5 y 100 caracteres y puede contener letras, números y caracteres especiales básicos">
+                <div class="error-message" id="direccion_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">La dirección debe tener entre 5 y 100 caracteres y puede contener letras, números y caracteres especiales básicos</span>
+                </div>
             </div>
             
             <div class="form-group">
@@ -55,6 +97,10 @@ $planes = $propietarioModel->getPlanes();
                         <option value="<?php echo $pais['pais_id']; ?>"><?php echo htmlspecialchars($pais['nombre']); ?></option>
                     <?php endforeach; ?>
                 </select>
+                <div class="error-message" id="pais_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">Debe seleccionar un país</span>
+                </div>
             </div>
             
             <div class="form-group">
@@ -62,6 +108,10 @@ $planes = $propietarioModel->getPlanes();
                 <select id="departamento" name="departamento" class="form-control" required disabled>
                     <option value="">Seleccione un departamento</option>
                 </select>
+                <div class="error-message" id="departamento_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">Debe seleccionar un departamento</span>
+                </div>
             </div>
             
             <div class="form-group">
@@ -69,6 +119,10 @@ $planes = $propietarioModel->getPlanes();
                 <select id="ciudad" name="ciudad" class="form-control" required disabled>
                     <option value="">Seleccione una ciudad</option>
                 </select>
+                <div class="error-message" id="ciudad_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">Debe seleccionar una ciudad</span>
+                </div>
             </div>
             
             <div class="form-group">
@@ -79,10 +133,14 @@ $planes = $propietarioModel->getPlanes();
                         <option value="<?php echo $plan['plan_id']; ?>"><?php echo htmlspecialchars($plan['nombre']); ?></option>
                     <?php endforeach; ?>
                 </select>
+                <div class="error-message" id="plan_error">
+                    <span class="error-icon">✕</span>
+                    <span class="error-text">Debe seleccionar un plan</span>
+                </div>
             </div>
             
             <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="submit" class="btn btn-primary" id="submit-btn">Guardar</button>
             </div>
         </form>
     </div>
@@ -189,6 +247,51 @@ select:disabled {
     background-color: #f5f5f5;
     cursor: not-allowed;
 }
+
+.error-message {
+    display: none;
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: rgba(231, 76, 60, 0.1);
+}
+
+.error-message.show {
+    display: flex;
+    align-items: center;
+}
+
+.error-icon {
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+.form-control.error {
+    border-color: #e74c3c;
+}
+
+.form-control.valid {
+    border-color: #2ecc71;
+}
+
+.submit-btn:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+.btn-primary.disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.btn-primary:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
 </style>
 
 <script>
@@ -198,6 +301,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const paisSelect = document.getElementById('pais');
     const departamentoSelect = document.getElementById('departamento');
     const ciudadSelect = document.getElementById('ciudad');
+    const submitBtn = document.getElementById('submit-btn');
+    const requiredInputs = form.querySelectorAll('input[required]');
+    const requiredSelects = form.querySelectorAll('select[required]');
     
     // Mostrar modal si es el primer inicio de sesión
     if (<?php echo isset($_SESSION['is_first_login']) ? 'true' : 'false'; ?>) {
@@ -205,9 +311,66 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = 'hidden';
     }
     
+    // Función para validar un campo
+    function validateField(input) {
+        const errorElement = document.getElementById(`${input.id}_error`);
+        let isValid = true;
+        
+        if (input.tagName === 'SELECT') {
+            isValid = input.value !== '';
+        } else {
+            isValid = input.checkValidity();
+        }
+        
+        if (isValid) {
+            input.classList.remove('error');
+            input.classList.add('valid');
+            if (errorElement) {
+                errorElement.classList.remove('show');
+            }
+        } else {
+            input.classList.remove('valid');
+            input.classList.add('error');
+            if (errorElement) {
+                errorElement.classList.add('show');
+            }
+        }
+        
+        return isValid;
+    }
+    
+    // Función para validar todo el formulario
+    function validateForm() {
+        let isValid = true;
+        
+        // Validar inputs requeridos
+        requiredInputs.forEach(input => {
+            if (!validateField(input)) {
+                isValid = false;
+            }
+        });
+        
+        // Validar selects requeridos
+        requiredSelects.forEach(select => {
+            if (!select.disabled && !validateField(select)) {
+                isValid = false;
+            }
+        });
+        
+        // Deshabilitar/habilitar el botón de guardar
+        submitBtn.disabled = !isValid;
+        if (!isValid) {
+            submitBtn.classList.add('disabled');
+        } else {
+            submitBtn.classList.remove('disabled');
+        }
+    }
+    
     // Cargar departamentos cuando se selecciona un país
     paisSelect.addEventListener('change', function() {
         const paisId = this.value;
+        validateField(this);
+        
         if (paisId) {
             fetch(`../control/propietario_controller.php?action=get_departamentos&pais_id=${paisId}`)
                 .then(response => response.json())
@@ -220,6 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         departamentoSelect.disabled = false;
                         ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
                         ciudadSelect.disabled = true;
+                        validateForm();
                     } else {
                         console.error('Error:', data.error);
                         alert('Error al cargar los departamentos');
@@ -234,12 +398,15 @@ document.addEventListener('DOMContentLoaded', function() {
             departamentoSelect.disabled = true;
             ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
             ciudadSelect.disabled = true;
+            validateForm();
         }
     });
     
     // Cargar ciudades cuando se selecciona un departamento
     departamentoSelect.addEventListener('change', function() {
         const deptoId = this.value;
+        validateField(this);
+        
         if (deptoId) {
             fetch(`../control/propietario_controller.php?action=get_ciudades&departamento_id=${deptoId}`)
                 .then(response => response.json())
@@ -250,6 +417,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ciudadSelect.innerHTML += `<option value="${ciudad.ciudad_id}">${ciudad.nombre}</option>`;
                         });
                         ciudadSelect.disabled = false;
+                        validateForm();
                     } else {
                         console.error('Error:', data.error);
                         alert('Error al cargar las ciudades');
@@ -262,12 +430,42 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
             ciudadSelect.disabled = true;
+            validateForm();
         }
     });
+    
+    // Agregar eventos de validación a cada campo
+    form.querySelectorAll('input, select').forEach(field => {
+        field.addEventListener('input', function() {
+            validateField(this);
+            validateForm();
+        });
+        
+        field.addEventListener('blur', function() {
+            validateField(this);
+            validateForm();
+        });
+        
+        field.addEventListener('change', function() {
+            validateField(this);
+            validateForm();
+        });
+    });
+    
+    // Validar el formulario al cargar
+    validateForm();
     
     // Manejar el envío del formulario
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        // Validar el formulario una última vez antes de enviar
+        validateForm();
+        
+        if (submitBtn.disabled) {
+            return;
+        }
+        
         const formData = new FormData(this);
         
         fetch('../control/propietario_controller.php', {
@@ -277,7 +475,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Redirigir a la página principal donde se mostrará la notificación verde
                 window.location.href = data.redirect;
             } else {
                 alert(data.error || 'Error al guardar los datos');

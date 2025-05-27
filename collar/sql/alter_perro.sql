@@ -1,0 +1,1 @@
+ALTER TABLE `perro` MODIFY `perro_id` int NOT NULL AUTO_INCREMENT; 

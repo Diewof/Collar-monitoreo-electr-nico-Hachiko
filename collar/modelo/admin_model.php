@@ -168,23 +168,201 @@ class AdminModel {
     }
 
     /**
- * Actualiza los datos de un usuario
- */
-public function updateUser($userId, $email, $password, $role) {
-    // Si no se proporciona contraseña, solo actualizar email y rol
-    if (empty($password)) {
-        $query = "UPDATE users SET email = ?, role = ? WHERE id = ?";
+     * Actualiza los datos de un usuario
+     */
+    public function updateUser($userId, $email, $password, $role) {
+        // Si no se proporciona contraseña, solo actualizar email y rol
+        if (empty($password)) {
+            $query = "UPDATE users SET email = ?, role = ? WHERE id = ?";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param("ssi", $email, $role, $userId);
+            return $stmt->execute();
+        }
+        
+        // Si se proporciona contraseña, actualizarla también
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $query = "UPDATE users SET email = ?, password = ?, role = ? WHERE id = ?";
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param("ssi", $email, $role, $userId);
+        $stmt->bind_param("sssi", $email, $hashedPassword, $role, $userId);
         return $stmt->execute();
     }
-    
-    // Si se proporciona contraseña, actualizarla también
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    $query = "UPDATE users SET email = ?, password = ?, role = ? WHERE id = ?";
-    $stmt = $this->conn->prepare($query);
-    $stmt->bind_param("sssi", $email, $hashedPassword, $role, $userId);
-    return $stmt->execute();
-}
+
+    /**
+     * Ejecuta una consulta SQL directa
+     */
+    public function query($sql) {
+        return $this->conn->query($sql);
+    }
+
+    /**
+     * Prepara una consulta SQL
+     * @param string $sql La consulta SQL a preparar
+     * @return mysqli_stmt|false El objeto de sentencia preparada o false si hay error
+     */
+    public function prepare($sql) {
+        return $this->conn->prepare($sql);
+    }
+
+    /**
+     * Obtiene el último error de la base de datos
+     */
+    public function getLastError() {
+        return $this->conn->error;
+    }
+
+    /**
+     * Inicia una transacción
+     */
+    public function beginTransaction() {
+        $this->conn->begin_transaction();
+    }
+
+    /**
+     * Confirma una transacción
+     */
+    public function commit() {
+        $this->conn->commit();
+    }
+
+    /**
+     * Revierte una transacción
+     */
+    public function rollback() {
+        $this->conn->rollback();
+    }
+
+    /**
+     * Actualiza los datos de un propietario
+     */
+    public function updatePropietario($propietarioId, $primerNombre, $segundoNombre, $apellido, 
+                                    $segundoApellido, $telefono, $direccion, $paisId, $departamentoId, 
+                                    $ciudadId, $planId) {
+        try {
+            // Primero actualizar la residencia
+            $query = "UPDATE residencia SET direccion = ?, ciudad_id = ? 
+                     WHERE residencia_id = (SELECT residencia_id FROM propietario WHERE propietario_id = ?)";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param("sii", $direccion, $ciudadId, $propietarioId);
+            
+            if (!$stmt->execute()) {
+                return false;
+            }
+            
+            // Luego actualizar el propietario
+            $query = "UPDATE propietario SET 
+                     primer_nombre = ?, 
+                     segundo_nombre = ?, 
+                     apellido = ?, 
+                     segundo_apellido = ?, 
+                     telefono = ?,
+                     plan_id = ?
+                     WHERE propietario_id = ?";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param("sssssii", 
+                            $primerNombre, 
+                            $segundoNombre, 
+                            $apellido, 
+                            $segundoApellido, 
+                            $telefono,
+                            $planId,
+                            $propietarioId);
+            
+            return $stmt->execute();
+            
+        } catch (Exception $e) {
+            error_log("Error en updatePropietario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Inserta un nuevo propietario
+     */
+    public function insertPropietario($userId, $primerNombre, $segundoNombre, $apellido, 
+                                    $segundoApellido, $telefono, $direccion, $paisId, $departamentoId, 
+                                    $ciudadId, $planId) {
+        try {
+            // Primero insertar la residencia
+            $query = "INSERT INTO residencia (direccion, ciudad_id) VALUES (?, ?)";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param("si", $direccion, $ciudadId);
+            
+            if (!$stmt->execute()) {
+                return false;
+            }
+            
+            $residenciaId = $this->conn->insert_id;
+            
+            // Luego insertar el propietario
+            $query = "INSERT INTO propietario (user_id, residencia_id, primer_nombre, 
+                     segundo_nombre, apellido, segundo_apellido, telefono, plan_id) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param("iisssssi", 
+                            $userId, 
+                            $residenciaId,
+                            $primerNombre, 
+                            $segundoNombre, 
+                            $apellido, 
+                            $segundoApellido, 
+                            $telefono,
+                            $planId);
+            
+            return $stmt->execute();
+            
+        } catch (Exception $e) {
+            error_log("Error en insertPropietario: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Registra un nuevo usuario
+     * @param string $email Correo electrónico del usuario
+     * @param string $password Contraseña del usuario
+     * @param string $role Rol del usuario
+     * @return array Resultado de la operación
+     */
+    public function registerUser($email, $password, $role) {
+        try {
+            // Verificar si el email ya está registrado
+            $stmt = $this->conn->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                return [
+                    'success' => false,
+                    'error' => 'Este correo electrónico ya está registrado'
+                ];
+            }
+            
+            // Generar hash de la contraseña
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            
+            // Insertar el nuevo usuario
+            $stmt = $this->conn->prepare("
+                INSERT INTO users (email, password, role, created_at) 
+                VALUES (?, ?, ?, NOW())
+            ");
+            
+            $stmt->bind_param("sss", $email, $hashedPassword, $role);
+            $stmt->execute();
+            
+            return [
+                'success' => true,
+                'user_id' => $this->conn->insert_id
+            ];
+        } catch(Exception $e) {
+            error_log("Error en registro de usuario: " . $e->getMessage());
+            return [
+                'success' => false,
+                'error' => 'Error al registrar el usuario. Por favor, intente nuevamente.'
+            ];
+        }
+    }
 }
 ?>

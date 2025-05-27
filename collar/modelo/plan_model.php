@@ -24,5 +24,26 @@ class PlanModel {
             return false;
         }
     }
+
+    public function getAllPlans() {
+        try {
+            $sql = "SELECT plan_id, nombre_plan, descripcion, costo 
+                    FROM plan 
+                    ORDER BY costo ASC";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $plans = array();
+            while ($row = $result->fetch_assoc()) {
+                $plans[] = $row;
+            }
+            
+            return $plans;
+        } catch (Exception $e) {
+            error_log("Error al obtener todos los planes: " . $e->getMessage());
+            return array();
+        }
+    }
 }
 ?> 

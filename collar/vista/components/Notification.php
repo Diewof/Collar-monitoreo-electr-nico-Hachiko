@@ -55,13 +55,39 @@ class Notification {
                     opacity: 1;
                 }
             }
+            @keyframes fadeOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
             .notification {
                 transition: all 0.3s ease;
             }
             .notification:hover {
                 box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             }
+            .notification.fade-out {
+                animation: fadeOut 0.3s ease-out forwards;
+            }
         </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const notification = document.querySelector('.notification');
+                if (notification) {
+                    setTimeout(() => {
+                        notification.classList.add('fade-out');
+                        setTimeout(() => {
+                            notification.remove();
+                        }, 300);
+                    }, 10000);
+                }
+            });
+        </script>
         <?php
     }
 } 

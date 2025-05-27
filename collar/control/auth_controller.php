@@ -69,12 +69,20 @@ class AuthController extends BaseController {
             $_SESSION['is_logged_in'] = true;
             $_SESSION['user_role'] = $result['user_role'] ?? 'user';
             
-            // Si es el primer inicio de sesión, no redirigir
-            if (isset($_SESSION['is_first_login'])) {
-                $this->redirect('../vista/login-registro.php', 'Por favor, complete su información de propietario para continuar.', 'info');
-            } else {
+            // Verificar si el usuario tiene un propietario registrado
+            require_once '../modelo/propietario_model.php';
+            $propietarioModel = new PropietarioModel();
+            $propietario = $propietarioModel->getPropietarioByUserId($result['user_id']);
+            
+            if ($propietario) {
+                // Si existe el propietario, guardar su ID en la sesión
+                $_SESSION['propietario_id'] = $propietario['propietario_id'];
                 $redirectUrl = $_SESSION['user_role'] === 'admin' ? '../vista/admin_main.php' : '../vista/main.php';
                 $this->redirect($redirectUrl, '¡Bienvenido de nuevo!');
+            } else {
+                // Si no existe el propietario, establecer la bandera de primer inicio
+                $_SESSION['is_first_login'] = true;
+                $this->redirect('../vista/login-registro.php', 'Por favor, complete su información de propietario para continuar.', 'info');
             }
         } else {
             $this->redirect('../vista/login-registro.php?form=login', 
@@ -104,7 +112,36 @@ class AuthController extends BaseController {
         $result = $this->authModel->register($email, $password);
         
         if ($result['success']) {
-            $this->redirect('../vista/login-registro.php?form=login', '¡Registro exitoso! Ahora puedes iniciar sesión');
+            // Iniciar sesión automáticamente después del registro
+            $loginResult = $this->authModel->login($email, $password, $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+            
+            if ($loginResult['success']) {
+                $_SESSION['user_id'] = $loginResult['user_id'];
+                $_SESSION['user_email'] = $email;
+                $_SESSION['is_logged_in'] = true;
+                $_SESSION['user_role'] = $loginResult['user_role'] ?? 'user';
+                
+                // Verificar si el usuario tiene un propietario registrado
+                require_once '../modelo/propietario_model.php';
+                $propietarioModel = new PropietarioModel();
+                $propietario = $propietarioModel->getPropietarioByUserId($loginResult['user_id']);
+                
+                if ($propietario) {
+                    // Si existe el propietario, guardar su ID en la sesión
+                    $_SESSION['propietario_id'] = $propietario['propietario_id'];
+                    $redirectUrl = $_SESSION['user_role'] === 'admin' ? '../vista/admin_main.php' : '../vista/main.php';
+                    $this->redirect($redirectUrl, '¡Bienvenido! Tu cuenta ha sido creada exitosamente.');
+                } else {
+                    // Si no existe el propietario, establecer la bandera de primer inicio
+                    $_SESSION['is_first_login'] = true;
+                    $this->redirect('../vista/login-registro.php', 'Por favor, complete su información de propietario para continuar.', 'info');
+                }
+            } else {
+                $this->redirect('../vista/login-registro.php?form=login', 
+                    'Registro exitoso, pero hubo un error al iniciar sesión automáticamente. Por favor, inicie sesión manualmente.', 
+                    'error'
+                );
+            }
         } else {
             $this->redirect('../vista/login-registro.php?form=register', 
                 $result['error'] ?? 'Error al registrar el usuario', 
