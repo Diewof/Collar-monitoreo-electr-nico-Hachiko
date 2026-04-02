@@ -1,0 +1,10 @@
+## Tabla comparativa — Patrón Arquitectónico
+
+| Criterio | Arquitectura en 3 Capas | Microservicios |
+|----------|------------------------|----------------|
+| Experiencia del equipo | El equipo ya trabaja con PHP MVC. BaseController y BaseModel están implementados y funcionando. | Ningún integrante ha trabajado con microservicios. Se necesitaría aprender Docker, Kubernetes y API Gateway desde cero durante el proyecto. |
+| Estructura del código | Las carpetas `vista/`, `control/` y `modelo/` ya representan las tres capas. La transición es inmediata. | Habría que dividir el monorepo en al menos cuatro repositorios separados (auth, propietario, mascota, admin) y definir contratos de API entre ellos. |
+| Base de datos | La base de datos `collar` con sus relaciones (`users → propietario → residencia → ciudad`, `propietario → perro → raza`) funciona de forma natural en una sola instancia. | Habría que dividir la BD en cuatro instancias independientes y eliminar las FK actuales. Los JOINs de seis tablas del AdminController deberían reemplazarse por llamadas HTTP entre servicios. |
+| Seguridad y sesiones | El BaseController ya centraliza la validación de sesiones PHP y el control de roles (admin/usuario). Funciona de forma uniforme en todo el sistema. | Cada microservicio debería validar el token de forma independiente. Habría que implementar JWT o un API Gateway con autenticación federada, reemplazando el mecanismo de `$_SESSION`. |
+| Transacciones | El registro de propietario (inserción en residencia + propietario en una sola transacción) ya usa `begin_transaction`, `commit` y `rollback` de MySQLi correctamente. | Al separar propietario y residencia en servicios distintos, la transacción actual se convertiría en una operación distribuida que requiere el patrón SAGA para garantizar consistencia. |
+| Depuración y trazabilidad | Los `error_log()` distribuidos en los controladores permiten rastrear errores directamente. Todo el flujo es visible en un solo proyecto. | Un error en el flujo login → propietario → mascota cruzaría tres servicios distintos. Se necesitaría distributed tracing (Jaeger, Zipkin) para rastrearlo. |
