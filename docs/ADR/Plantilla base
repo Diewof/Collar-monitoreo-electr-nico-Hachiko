@@ -1,0 +1,24 @@
+# ADR-XXX: [Nombre]
+
+Estado: Propuesto | Aceptado
+
+Fecha: YYYY-MM-DD
+
+## Contexto
+Problema o situación que requiere una decisión.
+
+## Decisión
+Qué decisión se tomó.
+
+## Consecuencias
+
+### Positivas
+- Beneficio 1
+- Beneficio 2
+
+### Negativas
+- Riesgo o costo asociado
+
+## Alternativas Consideradas
+- Alternativa 1
+- Alternativa 2
