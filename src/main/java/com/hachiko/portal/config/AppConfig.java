@@ -1,0 +1,27 @@
+package com.hachiko.portal.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+/**
+ * Configuración general de la aplicación.
+ *
+ * Declara beans de infraestructura compartidos entre capas.
+ * El PasswordEncoder se inyecta en PasswordServiceBCrypt; ningún servicio
+ * de dominio instancia BCryptPasswordEncoder directamente (DIP).
+ */
+@Configuration
+public class AppConfig {
+
+    /**
+     * Codificador de contraseñas BCrypt con factor de coste 10.
+     * Es el único lugar del sistema donde se define la implementación concreta;
+     * el resto del código depende de la interfaz {@code PasswordEncoder}.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(10);
+    }
+}
