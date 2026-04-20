@@ -5,6 +5,7 @@ import com.hachiko.portal.dto.admin.UserDetailDTO;
 import com.hachiko.portal.dto.auth.RegisterRequest;
 import com.hachiko.portal.dto.usuario.UsuarioDTO;
 import com.hachiko.portal.service.IAdminDashboardService;
+import com.hachiko.portal.service.IAdminUserService;
 import com.hachiko.portal.service.IRegisterService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -40,11 +41,14 @@ import java.util.Map;
 public class AdminController {
 
     private final IAdminDashboardService adminDashboardService;
+    private final IAdminUserService adminUserService;
     private final IRegisterService registerService;
 
     public AdminController(IAdminDashboardService adminDashboardService,
+                           IAdminUserService adminUserService,
                            IRegisterService registerService) {
         this.adminDashboardService = adminDashboardService;
+        this.adminUserService = adminUserService;
         this.registerService = registerService;
     }
 
@@ -65,7 +69,7 @@ public class AdminController {
      */
     @GetMapping("/usuarios")
     public ResponseEntity<List<UsuarioDTO>> getAllUsers() {
-        return ResponseEntity.ok(adminDashboardService.getAllUsers());
+        return ResponseEntity.ok(adminUserService.getAllUsers());
     }
 
     /**
@@ -75,7 +79,7 @@ public class AdminController {
      */
     @GetMapping("/usuarios/{userId}")
     public ResponseEntity<UserDetailDTO> getUserDetail(@PathVariable Integer userId) {
-        return ResponseEntity.ok(adminDashboardService.getUserDetail(userId));
+        return ResponseEntity.ok(adminUserService.getUserDetail(userId));
     }
 
     /**
@@ -101,7 +105,7 @@ public class AdminController {
             @PathVariable Integer userId,
             @RequestBody Map<String, String> body) {
         String role = body.get("role");
-        adminDashboardService.updateUserRole(userId, role);
+        adminUserService.updateUserRole(userId, role);
         return ResponseEntity.ok(Map.of("message", "Rol actualizado correctamente."));
     }
 
@@ -112,7 +116,7 @@ public class AdminController {
      */
     @DeleteMapping("/usuarios/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Integer userId) {
-        adminDashboardService.deleteUser(userId);
+        adminUserService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }
 }

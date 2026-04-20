@@ -1,5 +1,6 @@
 package com.hachiko.portal.security;
 
+import com.hachiko.portal.service.ITokenBlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,24 +15,24 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Filtro JWT que se ejecuta una sola vez por request.
+ * Filtro JWT — se ejecuta una sola vez por request.
  *
- * Extrae el token del header Authorization, lo valida y, si es válido,
- * carga el contexto de seguridad con el userId y el rol del usuario.
+ * Valida el token y verifica que no haya sido revocado (blacklist).
+ * Si el token es inválido o está en la blacklist, no establece contexto
+ * y Spring Security bloqueará el acceso con 401.
  *
- * Si el token es inválido o no existe, simplemente no establece el contexto
- * y Spring Security bloqueará el acceso a rutas protegidas con 401.
- *
- * El userId se almacena como principal del Authentication para que los
- * controladores puedan extraerlo sin acceder al token directamente.
+ * Principio DIP: depende de IJwtTokenProvider (interfaz), no de JwtTokenProvider.
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final IJwtTokenProvider jwtTokenProvider;
+    private final ITokenBlacklistService tokenBlacklistService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(IJwtTokenProvider jwtTokenProvider,
+                                   ITokenBlacklistService tokenBlacklistService) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     @Override
@@ -42,7 +43,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extractToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
+        if (token != null
+                && jwtTokenProvider.validateToken(token)
+                && !tokenBlacklistService.isBlacklisted(token)) {
+
             Integer userId = jwtTokenProvider.getUserIdFromToken(token);
             String role = jwtTokenProvider.getRoleFromToken(token);
 

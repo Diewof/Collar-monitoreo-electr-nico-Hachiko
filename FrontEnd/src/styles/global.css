@@ -1,0 +1,211 @@
+/* ── Fuente ──────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ── Reset universal (única definición en toda la app) ───────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a    { text-decoration: none; color: inherit; }
+ul   { list-style: none; }
+button, input, select, textarea { font-family: inherit; cursor: pointer; }
+input, select, textarea { cursor: text; }
+
+/* ── Notificaciones toast ────────────────────────────────────────────────── */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  max-width: 380px;
+}
+
+.notification {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 4px 12px var(--shadow-md);
+  animation: slideInLeft 0.3s ease;
+  pointer-events: auto;
+  line-height: 1.4;
+}
+
+.notification__text {
+  flex: 1;
+}
+
+.notification__close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.8);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.notification__close:hover { color: #fff; }
+
+.notification--success { background-color: #28a745; }
+.notification--error   { background-color: #dc3545; }
+.notification--info    { background-color: #17a2b8; }
+
+@keyframes slideInLeft {
+  from { transform: translateX(-110%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+/* ── Spinner ─────────────────────────────────────────────────────────────── */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Input group con icono (compartido por auth + formularios) ───────────── */
+.input-group {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.input-group .input-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.input-group .password-toggle {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+/* ── Mensajes de validación inline ──────────────────────────────────────── */
+.validation-message {
+  font-size: 12px;
+  position: absolute;
+  bottom: -18px;
+  left: 40px;
+  transition: color 0.2s ease;
+}
+
+.validation-message.valid   { color: var(--color-success); }
+.validation-message.invalid { color: var(--color-error); }
+
+input.valid   { border-color: var(--color-success) !important; }
+input.invalid { border-color: var(--color-error)   !important; }
+
+/* ── Input campo compartido (dashboard, formularios) ────────────────────── */
+/* .input-field se usa en CompletarPerfil, EditarPerfil, MascotaForm, etc.   */
+.input-field {
+  width: 100%;
+  padding: 13px 14px;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.15);
+}
+
+.input-field:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background-color: var(--color-hover);
+}
+
+.input-field option {
+  background-color: var(--color-bg-alt);
+  color: var(--color-text);
+}
+
+/* ── Botón submit compartido ─────────────────────────────────────────────── */
+.submit-btn {
+  padding: 13px 20px;
+  background-color: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: var(--color-primary-dk);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ── Página de error genérica ────────────────────────────────────────────── */
+.error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 16px;
+  padding: 40px;
+  text-align: center;
+}
+
+.error-page h1 { font-size: 2rem; }

@@ -39,7 +39,7 @@ public class Perro {
     private BigDecimal peso;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "genero", length = 1)
+    @Column(name = "genero", length = 1, columnDefinition = "varchar(1)")
     private Genero genero;
 
     @Column(name = "esterilizado")

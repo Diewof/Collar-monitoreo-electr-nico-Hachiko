@@ -22,7 +22,7 @@ import java.util.Date;
  * de entorno (JWT_SECRET, JWT_EXPIRATION_MS) para no hardcodear credenciales.
  */
 @Component
-public class JwtTokenProvider {
+public class JwtTokenProvider implements IJwtTokenProvider {
 
     private final SecretKey secretKey;
     private final long expirationMs;
@@ -42,6 +42,7 @@ public class JwtTokenProvider {
      * @param role   Rol del usuario (ADMIN / USER)
      * @return token JWT como String
      */
+    @Override
     public String generateToken(Integer userId, String email, String role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + expirationMs);
@@ -62,6 +63,7 @@ public class JwtTokenProvider {
      * @param token JWT a validar
      * @return true si el token es válido y vigente
      */
+    @Override
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -80,6 +82,7 @@ public class JwtTokenProvider {
      * @param token JWT válido
      * @return userId almacenado en el claim
      */
+    @Override
     public Integer getUserIdFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -95,6 +98,7 @@ public class JwtTokenProvider {
      * @param token JWT válido
      * @return rol almacenado en el claim (ej. "ADMIN" o "USER")
      */
+    @Override
     public String getRoleFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -102,5 +106,29 @@ public class JwtTokenProvider {
                 .parseSignedClaims(token)
                 .getPayload()
                 .get("role", String.class);
+    }
+
+    /**
+     * Extrae la fecha de expiración del token en milisegundos Unix.
+     * Usado por LogoutService para registrar cuándo expira el token revocado.
+     */
+    @Override
+    public long getExpirationFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getExpiration()
+                .getTime();
+    }
+
+    /**
+     * Retorna el tiempo de vida configurado del token en milisegundos.
+     * Usado por AuthController para incluir expiresIn en el LoginResponse.
+     */
+    @Override
+    public long getExpirationMs() {
+        return expirationMs;
     }
 }

@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit;
  *
  * Reglas migradas de authmodel.php:
  *   MAX_ATTEMPTS = 3 intentos fallidos
- *   LOCK_WINDOW_MINUTES = 15 minutos
+ *   LOCK_WINDOW_MINUTES = 10 minutos
  *
  * Un email o IP se considera bloqueado cuando acumula >= 3 intentos
  * dentro de la ventana de 15 minutos. El bloqueo expira automáticamente
@@ -25,7 +25,7 @@ import java.time.temporal.ChronoUnit;
 public class LockServiceImpl implements ILockService {
 
     static final int MAX_ATTEMPTS = 3;
-    static final int LOCK_WINDOW_MINUTES = 15;
+    static final int LOCK_WINDOW_MINUTES = 10;
 
     private final ILoginAttemptRepository loginAttemptRepository;
 
@@ -55,6 +55,13 @@ public class LockServiceImpl implements ILockService {
     @Transactional
     public void clearAttempts(String email, String ipAddress) {
         loginAttemptRepository.deleteByEmailOrIpAddress(email, ipAddress);
+    }
+
+    @Override
+    public int getRemainingAttempts(String email, String ipAddress) {
+        LocalDateTime since = LocalDateTime.now().minusMinutes(LOCK_WINDOW_MINUTES);
+        long used = loginAttemptRepository.countRecentAttempts(email, ipAddress, since);
+        return (int) Math.max(MAX_ATTEMPTS - used, 0);
     }
 
     @Override

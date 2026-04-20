@@ -8,15 +8,10 @@ import org.springframework.stereotype.Component;
  * Validador centralizado de datos de usuario.
  * Módulo: Autenticación y Gestión de Usuarios.
  *
- * Principio SRP: esta clase es la ÚNICA fuente de verdad para las reglas de
- * validación de email, contraseña y rol en todo el sistema. Si la regla de
- * longitud mínima de contraseña cambia, solo se modifica este archivo.
- *
- * Principio DIP: depende de IUsuarioRepository (abstracción), no de ninguna
- * implementación concreta de repositorio.
- *
- * Diseño: stateless — no mantiene estado entre llamadas; es seguro como bean
- * singleton de Spring (@Component).
+ * SRP: única fuente de verdad para reglas de validación de email,
+ * contraseña, rol y nombres en todo el sistema.
+ * DIP: depende de IUsuarioRepository (abstracción).
+ * Diseño: stateless — seguro como singleton de Spring.
  */
 @Component
 public class UserValidator {
@@ -26,6 +21,9 @@ public class UserValidator {
 
     /** Longitud máxima permitida para un email. */
     static final int EMAIL_MAX_LENGTH = 255;
+
+    /** Longitud máxima permitida para un nombre o apellido. */
+    static final int NOMBRE_MAX_LENGTH = 100;
 
     private final IUsuarioRepository usuarioRepository;
 
@@ -77,7 +75,8 @@ public class UserValidator {
 
     /**
      * Valida que una contraseña cumpla los requisitos mínimos de seguridad.
-     * Reglas actuales: no vacía, mínimo {@value #PASSWORD_MIN_LENGTH} caracteres.
+     * Reglas: no vacía, mínimo {@value #PASSWORD_MIN_LENGTH} caracteres,
+     * al menos una letra mayúscula y al menos un dígito.
      */
     public ValidationResult validatePassword(String password) {
         ValidationResult result = new ValidationResult();
@@ -89,7 +88,52 @@ public class UserValidator {
         if (password.length() < PASSWORD_MIN_LENGTH) {
             result.addError("La contraseña debe tener al menos " + PASSWORD_MIN_LENGTH + " caracteres.");
         }
+        if (!password.matches(".*[A-Z].*")) {
+            result.addError("La contraseña debe contener al menos una letra mayúscula.");
+        }
+        if (!password.matches(".*[0-9].*")) {
+            result.addError("La contraseña debe contener al menos un dígito.");
+        }
         return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // Validaciones de nombre
+    // -------------------------------------------------------------------------
+
+    /**
+     * Valida un nombre o apellido obligatorio.
+     * Reglas: no vacío, máximo {@value #NOMBRE_MAX_LENGTH} caracteres,
+     * solo letras (incluyendo tildes y ñ) y espacios.
+     *
+     * @param valor      contenido del campo
+     * @param nombreCampo etiqueta del campo para mensajes de error (ej: "Primer nombre")
+     */
+    public ValidationResult validateNombre(String valor, String nombreCampo) {
+        ValidationResult result = new ValidationResult();
+
+        if (valor == null || valor.isBlank()) {
+            result.addError(nombreCampo + " es obligatorio.");
+            return result;
+        }
+        if (valor.length() > NOMBRE_MAX_LENGTH) {
+            result.addError(nombreCampo + " no puede superar " + NOMBRE_MAX_LENGTH + " caracteres.");
+        }
+        if (!valor.matches("^[\\p{L} '\\-]+$")) {
+            result.addError(nombreCampo + " solo puede contener letras, espacios, apóstrofos e guiones.");
+        }
+        return result;
+    }
+
+    /**
+     * Valida un nombre o apellido opcional (puede ser nulo o vacío).
+     * Si se provee un valor, aplica las mismas reglas que {@link #validateNombre}.
+     */
+    public ValidationResult validateNombreOpcional(String valor, String nombreCampo) {
+        if (valor == null || valor.isBlank()) {
+            return new ValidationResult();
+        }
+        return validateNombre(valor, nombreCampo);
     }
 
     // -------------------------------------------------------------------------
@@ -125,7 +169,7 @@ public class UserValidator {
      * Valida todos los campos necesarios para registrar un nuevo usuario.
      * Acumula todos los errores encontrados en un único resultado.
      *
-     * Verifica: formato de email, disponibilidad del email, y contraseña.
+     * Verifica: formato de email, disponibilidad del email, y contraseña (con fuerza).
      */
     public ValidationResult validateNewUser(String email, String password) {
         ValidationResult result = new ValidationResult();

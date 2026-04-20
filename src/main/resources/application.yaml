@@ -1,11 +1,13 @@
 spring:
   application:
     name: portal
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/collar}
     username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:}
+    password: ${DB_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -22,3 +24,16 @@ server:
 jwt:
   secret: ${JWT_SECRET:hachiko-portal-dev-secret-key-must-be-at-least-32-chars}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:8080}
+
+# ─── Email ────────────────────────────────────────────────────────────────────
+# provider: stub   → solo loguea (por defecto, sin configuración extra)
+# provider: resend → envía emails reales via Resend API
+#
+email:
+  provider: ${EMAIL_PROVIDER:stub}
+  resend:
+    api-key: ${RESEND_API_KEY:FALTA_CONFIGURAR}
+    from: ${EMAIL_FROM:Hachiko <onboarding@resend.dev>}

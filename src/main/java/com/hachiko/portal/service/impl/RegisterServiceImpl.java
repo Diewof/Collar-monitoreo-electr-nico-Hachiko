@@ -11,6 +11,8 @@ import com.hachiko.portal.service.IPasswordService;
 import com.hachiko.portal.service.IRegisterService;
 import com.hachiko.portal.service.validation.ValidationResult;
 import com.hachiko.portal.service.validation.UserValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,8 @@ import java.time.LocalDateTime;
  */
 @Service
 public class RegisterServiceImpl implements IRegisterService {
+
+    private static final Logger log = LoggerFactory.getLogger(RegisterServiceImpl.class);
 
     private final IUsuarioRepository usuarioRepository;
     private final UserValidator userValidator;
@@ -71,13 +75,17 @@ public class RegisterServiceImpl implements IRegisterService {
                 .build();
         Usuario saved = usuarioRepository.save(usuario);
 
-        // Paso 5: Enviar email de bienvenida.
-        emailService.send(
-                email,
-                "Bienvenido a Hachiko",
-                "Hola, tu cuenta ha sido creada exitosamente. " +
-                "Por favor completa tu perfil para comenzar a usar la plataforma."
-        );
+        // Paso 5: Enviar email de bienvenida (fallo no cancela el registro).
+        try {
+            emailService.send(
+                    email,
+                    "Bienvenido a Hachiko",
+                    "Hola, tu cuenta ha sido creada exitosamente. " +
+                    "Por favor completa tu perfil para comenzar a usar la plataforma."
+            );
+        } catch (Exception e) {
+            log.warn("[REGISTER] Email de bienvenida no enviado a '{}': {}", email, e.getMessage());
+        }
 
         // Paso 6: Retornar DTO del usuario creado.
         return toDTO(saved);

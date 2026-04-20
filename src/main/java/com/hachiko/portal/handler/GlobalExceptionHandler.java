@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Manejador global de excepciones para la API REST del portal Hachiko.
@@ -43,6 +45,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(ex.getStatus())
                 .body(errorBody(ex.getMessage(), ex.getErrors()));
+    }
+
+    /**
+     * Maneja errores de validación de @Valid en el controlador (@NotBlank, @Email, @Size, etc.).
+     * HTTP 422 — extrae todos los mensajes de campo y los retorna como lista.
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        List<String> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getDefaultMessage())
+                .collect(Collectors.toList());
+        String first = errors.isEmpty() ? "Error de validación." : errors.get(0);
+        log.debug("Bean validation errors: {}", errors);
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(errorBody(first, errors));
     }
 
     /**

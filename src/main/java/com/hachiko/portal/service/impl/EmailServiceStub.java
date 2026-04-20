@@ -3,7 +3,7 @@ package com.hachiko.portal.service.impl;
 import com.hachiko.portal.service.IEmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
  * intento de envío. No valida contenido ni decide cuándo enviar.
  */
 @Service
-@Primary
+@ConditionalOnProperty(name = "email.provider", havingValue = "stub", matchIfMissing = true)
 public class EmailServiceStub implements IEmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailServiceStub.class);

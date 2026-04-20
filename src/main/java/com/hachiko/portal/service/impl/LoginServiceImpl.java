@@ -61,7 +61,15 @@ public class LoginServiceImpl implements ILoginService {
         // Paso 3: Verificar contraseña BCrypt.
         if (!passwordService.matches(rawPassword, usuario.getPassword())) {
             lockService.recordFailedAttempt(email, ipAddress);
-            throw new AuthenticationException();
+            int remaining = lockService.getRemainingAttempts(email, ipAddress);
+            if (remaining == 0) {
+                long mins = lockService.getRemainingLockMinutes(email, ipAddress);
+                throw new AccountLockedException(mins > 0 ? mins : 1L);
+            }
+            String msg = remaining == 1
+                    ? "Contraseña incorrecta. Tiene 1 intento restante antes de bloquear peticiones de login."
+                    : "Contraseña incorrecta. Tiene " + remaining + " intentos restantes antes de bloquear peticiones de login.";
+            throw new AuthenticationException(msg);
         }
 
         // Paso 4: Login exitoso — actualizar lastLogin.

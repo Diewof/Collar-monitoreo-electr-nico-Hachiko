@@ -1,0 +1,21 @@
+{
+  "properties": [
+    {
+      "name": "jwt.secret",
+      "type": "java.lang.String",
+      "description": "Secret HMAC-SHA256 para firmar los JWT. Mínimo 32 caracteres. En producción usar JWT_SECRET como variable de entorno."
+    },
+    {
+      "name": "jwt.expiration-ms",
+      "type": "java.lang.Long",
+      "description": "Tiempo de vida del token JWT en milisegundos. Por defecto 86400000 (24 horas).",
+      "defaultValue": 86400000
+    },
+    {
+      "name": "cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "Lista de orígenes permitidos para CORS separados por comas. En producción usar CORS_ALLOWED_ORIGINS como variable de entorno.",
+      "defaultValue": "http://localhost:3000,http://localhost:5173,http://localhost:8080"
+    }
+  ]
+}

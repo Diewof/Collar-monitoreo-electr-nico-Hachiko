@@ -6,7 +6,7 @@ import com.hachiko.portal.dto.auth.NewPasswordRequest;
 import com.hachiko.portal.dto.auth.PasswordResetRequest;
 import com.hachiko.portal.dto.auth.RegisterRequest;
 import com.hachiko.portal.dto.usuario.UsuarioDTO;
-import com.hachiko.portal.security.JwtTokenProvider;
+import com.hachiko.portal.security.IJwtTokenProvider;
 import com.hachiko.portal.service.ILoginService;
 import com.hachiko.portal.service.ILogoutService;
 import com.hachiko.portal.service.IPasswordResetService;
@@ -47,13 +47,13 @@ public class AuthController {
     private final IRegisterService registerService;
     private final ILogoutService logoutService;
     private final IPasswordResetService passwordResetService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final IJwtTokenProvider jwtTokenProvider;
 
     public AuthController(ILoginService loginService,
                           IRegisterService registerService,
                           ILogoutService logoutService,
                           IPasswordResetService passwordResetService,
-                          JwtTokenProvider jwtTokenProvider) {
+                          IJwtTokenProvider jwtTokenProvider) {
         this.loginService = loginService;
         this.registerService = registerService;
         this.logoutService = logoutService;
@@ -80,6 +80,7 @@ public class AuthController {
                 response.getEmail(),
                 response.getRole());
         response.setToken(token);
+        response.setExpiresIn(jwtTokenProvider.getExpirationMs() / 1000);
 
         return ResponseEntity.ok(response);
     }
@@ -96,9 +97,7 @@ public class AuthController {
     }
 
     /**
-     * Cierra la sesión del usuario autenticado limpiando intentos de login.
-     *
-     * El cliente debe descartar el token JWT por su cuenta (stateless).
+     * Cierra la sesión del usuario autenticado: revoca el JWT y limpia intentos de login.
      *
      * POST /api/auth/logout
      */
@@ -106,7 +105,8 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> logout(
             @AuthenticationPrincipal Integer userId,
             HttpServletRequest httpRequest) {
-        logoutService.logout(userId, extractIp(httpRequest));
+        String token = extractTokenFromRequest(httpRequest);
+        logoutService.logout(userId, extractIp(httpRequest), token);
         return ResponseEntity.ok(Map.of("message", "Has cerrado sesión correctamente."));
     }
 
@@ -149,5 +149,16 @@ public class AuthController {
             return forwarded.split(",")[0].trim();
         }
         return request.getRemoteAddr();
+    }
+
+    /**
+     * Extrae el token JWT del header Authorization sin el prefijo "Bearer ".
+     */
+    private String extractTokenFromRequest(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        return null;
     }
 }

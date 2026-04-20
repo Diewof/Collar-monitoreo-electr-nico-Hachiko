@@ -29,4 +29,11 @@ public class LoginResponse {
 
     /** JWT generado por el controlador tras autenticación exitosa. */
     private String token;
+
+    /**
+     * Segundos hasta que el token expira desde el momento del login.
+     * Permite al frontend implementar renovación proactiva o mostrar un timer de sesión.
+     * Ejemplo: 86400 para un token de 24 horas.
+     */
+    private long expiresIn;
 }

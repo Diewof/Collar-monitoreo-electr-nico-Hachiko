@@ -4,25 +4,20 @@ package com.hachiko.portal.service;
  * Contrato para el cierre de sesión del lado del servidor.
  * Módulo: Autenticación.
  *
- * En la arquitectura actual (stateless REST sin JWT), el logout del servidor
- * se limita a limpiar los intentos de login asociados para que la próxima
- * sesión comience con contador en cero.
- *
- * Nota de diseño: cuando se implemente JWT en Etapa 5, este servicio también
- * invalidará el token en la lista de revocación.
+ * El logout en un sistema JWT stateless requiere dos acciones:
+ *  1. Revocar el token JWT en la blacklist para que no pueda reutilizarse.
+ *  2. Limpiar los intentos de login del usuario.
  *
  * Principio ISP: interfaz mínima, no mezcla responsabilidades de login o registro.
  */
 public interface ILogoutService {
 
     /**
-     * Ejecuta el cierre de sesión del lado del servidor para un usuario.
+     * Cierra la sesión del usuario: revoca el JWT y limpia intentos de login.
      *
-     * Operación actual: limpiar intentos de login asociados al email del usuario
-     * e ip para que la próxima sesión comience con contador en cero.
-     *
-     * @param userId    ID del usuario que cierra sesión
+     * @param userId    ID del usuario autenticado (extraído del token por el controlador)
      * @param ipAddress IP del cliente (para limpiar intentos por IP)
+     * @param token     JWT completo (sin prefijo "Bearer ") para revocar en la blacklist
      */
-    void logout(Integer userId, String ipAddress);
+    void logout(Integer userId, String ipAddress, String token);
 }

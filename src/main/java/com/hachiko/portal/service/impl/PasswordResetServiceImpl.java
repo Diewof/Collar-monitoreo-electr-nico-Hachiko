@@ -12,6 +12,8 @@ import com.hachiko.portal.service.IPasswordResetService;
 import com.hachiko.portal.service.IPasswordService;
 import com.hachiko.portal.service.validation.UserValidator;
 import com.hachiko.portal.service.validation.ValidationResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ import java.util.UUID;
 @Service
 public class PasswordResetServiceImpl implements IPasswordResetService {
 
+    private static final Logger log = LoggerFactory.getLogger(PasswordResetServiceImpl.class);
     private static final int TOKEN_EXPIRY_HOURS = 1;
 
     private final IUsuarioRepository usuarioRepository;
@@ -75,13 +78,17 @@ public class PasswordResetServiceImpl implements IPasswordResetService {
                 .build();
         passwordResetRepository.save(reset);
 
-        // Paso 5: Enviar email con el token.
-        emailService.send(
-                email,
-                "Recuperar contraseña — Hachiko",
-                "Para restablecer tu contraseña usa el siguiente token:\n\n" + token +
-                "\n\nEste enlace expira en " + TOKEN_EXPIRY_HOURS + " hora(s)."
-        );
+        // Paso 5: Enviar email con el token (fallo no cancela la operación).
+        try {
+            emailService.send(
+                    email,
+                    "Recuperar contraseña — Hachiko",
+                    "Para restablecer tu contraseña usa el siguiente token:\n\n" + token +
+                    "\n\nEste enlace expira en " + TOKEN_EXPIRY_HOURS + " hora(s)."
+            );
+        } catch (Exception e) {
+            log.warn("[PASSWORD-RESET] Email no enviado a '{}': {}", email, e.getMessage());
+        }
     }
 
     @Override

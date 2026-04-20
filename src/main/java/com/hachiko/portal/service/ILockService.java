@@ -5,8 +5,8 @@ package com.hachiko.portal.service;
  * Módulo: Autenticación — Seguridad.
  *
  * Regla de negocio migrada de authmodel.php:
- *   MAX_ATTEMPTS = 3, WINDOW = 15 minutos.
- *   Una cuenta se bloquea cuando email O ip acumula >= 3 intentos en 15 min.
+ *   MAX_ATTEMPTS = 3, WINDOW = 10 minutos.
+ *   Una cuenta se bloquea cuando email O ip acumula >= 3 intentos en 10 min.
  *   El bloqueo expira automáticamente al cumplirse la ventana de tiempo.
  *   Un login exitoso limpia todos los intentos del email e ip.
  *
@@ -52,4 +52,14 @@ public interface ILockService {
      * @return minutos hasta que expire el bloqueo (0 si no bloqueado)
      */
     long getRemainingLockMinutes(String email, String ipAddress);
+
+    /**
+     * Calcula los intentos restantes antes de que la cuenta sea bloqueada.
+     * Retorna 0 si ya se han agotado todos los intentos.
+     *
+     * @param email     correo del intento
+     * @param ipAddress IP del cliente
+     * @return intentos disponibles antes del bloqueo (mínimo 0)
+     */
+    int getRemainingAttempts(String email, String ipAddress);
 }
