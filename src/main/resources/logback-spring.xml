@@ -2,7 +2,7 @@
 <configuration>
 
     <!-- ── Perfil local / dev: texto plano con colores ───────────────────── -->
-    <springProfile name="local,default">
+    <springProfile name="local,default,docker">
         <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
