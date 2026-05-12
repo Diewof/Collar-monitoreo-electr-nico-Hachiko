@@ -1,13 +1,10 @@
 package com.hachiko.portal;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class PortalApplicationTests {
+class PortalApplicationTests extends AbstractIntegrationTest {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {
+    }
 }
